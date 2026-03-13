@@ -81,12 +81,12 @@ export default function SettingsPage() {
         </Card>
 
         {/* System Info */}
-        <Card title="GaaS Node Details" action={<Server size={14} color="var(--accent)"/>}>
+        <Card title="Kavach Node Details" action={<Server size={14} color="var(--accent)"/>}>
           <div style={{ display:'flex',flexDirection:'column',gap:10 }}>
             {[
-              ['Deployment ID', 'GAAS-NODE-IN-001'],
+              ['Deployment ID', 'KAVACH-NODE-IN-001'],
               ['Engine Version', '2.0.0-PROD'],
-              ['GaaS Endpoint', 'kavachx-api-node'],
+              ['Kavach Endpoint', 'kavachx-api-node'],
               ['Jurisdiction', 'India (MeitY)'],
               ['Compliance', 'DPDPA, EU AI Act'],
               ['Uptime', '99.9%'],
@@ -130,13 +130,13 @@ export default function SettingsPage() {
       </Card>
 
       {/* API Keys */}
-      <Card title="GaaS API Access & Connectivity">
+      <Card title="Kavach API Access & Connectivity">
         <div className="alert alert-info" style={{ marginBottom:16 }}>
           <span style={{ fontSize:12 }}>These keys allow your external LLMs/ML models to connect to the KavachX Governance Layer.</span>
         </div>
         <div style={{ display:'flex',flexDirection:'column',gap:8 }}>
           {[
-            { name:'Production GaaS Core Key', key:'kavachx-gaas-demo-key', status:'active', role:'ML Engineer (System)' },
+            { name:'Production Kavach Core Key', key:'kavachx-demo-key', status:'active', role:'ML Engineer (System)' },
           ].map(k => (
             <div key={k.name} style={{ display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',background:'var(--bg-elevated)',border:'1px solid var(--border)',borderRadius:8 }}>
               <div>

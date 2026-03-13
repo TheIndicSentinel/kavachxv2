@@ -135,12 +135,12 @@ from fastapi import Header
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
-    # Optional header for machine-to-machine integrations (GaaS)
+    # Optional header for machine-to-machine integrations (Kavach)
     x_api_key: Optional[str] = Header(None)
 ):
-    # 1. API KEY Check (GaaS System-to-System Auth)
+    # 1. API KEY Check (Kavach System-to-System Auth)
     if x_api_key:
-        if x_api_key == "kavachx-gaas-demo-key":  # Simple static check for demo
+        if x_api_key == "kavachx-demo-key":  # Simple static check for demo
             return {"id": "system", "name": "API Client", "role": "ml_engineer", "email": "api@kavachx.ai"}
         raise HTTPException(status_code=401, detail="Invalid API Key")
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Card from '../components/shared/Card'
-import { Send, Shield, Zap, AlertTriangle, CheckCircle, Terminal, Search, Settings } from 'lucide-react'
+import { Send, Shield, Zap, AlertTriangle, CheckCircle, Terminal, Search, Settings, Activity, Info } from 'lucide-react'
 import { governanceAPI } from '../utils/api'
 
 export default function PlaygroundPage() {
@@ -10,10 +10,11 @@ export default function PlaygroundPage() {
   const [result, setResult] = useState(null)
 
   const CONTEXTS = [
-    { id: 'general', label: 'General / Safery', icon: Shield, color: 'var(--accent)', desc: 'Standard safety & toxicity checks.' },
+    { id: 'general', label: 'General / Safety', icon: Shield, color: 'var(--accent)', desc: 'Standard safety & toxicity checks.' },
     { id: 'finance', label: 'Finance (RBI)', icon: Zap, color: 'var(--cyan)', desc: 'RBI Fair Lending & DTI checks.' },
     { id: 'healthcare', label: 'Healthcare (NHA)', icon: Activity, color: 'var(--red)', desc: 'NHA & ABDM Privacy checks.' },
     { id: 'education', label: 'Edu (NEP 2020)', icon: Info, color: 'var(--purple)', desc: 'EdTech Surveillance checks.' },
+    { id: 'shadow_ai', label: 'Shadow AI (Discovery)', icon: Search, color: 'var(--amber)', desc: 'Detect unauthorized AI usage via browser.' },
   ]
 
   // Intelligent detection for manual prompts
@@ -22,6 +23,7 @@ export default function PlaygroundPage() {
       case 'finance': return { input_data: { caste_proxy_score: 0.15, debt_ratio: 0.45 }, context: { domain: 'finance', regulation: 'RBI' } }
       case 'healthcare': return { input_data: { personal_data_used: true, consent_verified: false }, context: { domain: 'healthcare', abdm_linked: true } }
       case 'education': return { input_data: { continuous_monitoring: true, parental_consent: false }, context: { domain: 'education' } }
+      case 'shadow_ai': return { input_data: { external_tool_signature: 'chatgpt-v1-api' }, context: { shadow_ai_detected: true, source: 'browser_interceptor' } }
       default: return { input_data: { toxicity_score: 0.85, prompt_injection_score: 0.92 }, context: { domain: 'general' } }
     }
   }
@@ -37,7 +39,7 @@ export default function PlaygroundPage() {
     try {
       const response = await governanceAPI.simulate({
         input_data: { ...payload.input_data, prompt: prompt },
-        prediction: { content: "Evaluating your prompt against GaaS policy..." },
+        prediction: { content: "Evaluating your prompt against Kavach policy..." },
         context: payload.context,
         confidence: 0.9
       })
@@ -67,7 +69,7 @@ export default function PlaygroundPage() {
     <div style={{ maxWidth: 1000, margin: '0 auto' }}>
       <div className="page-header">
         <div className="page-eyebrow">Interactive Testing</div>
-        <h1 className="page-title">GaaS Live Playground</h1>
+        <h1 className="page-title">Kavach Live Playground</h1>
         <p className="page-desc">Simulate how your LLM application will interact with the KavachX Governance Engine.</p>
       </div>
 
@@ -149,7 +151,7 @@ export default function PlaygroundPage() {
             <div className="card-header" style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="card-title">KavachX Governance Console</span>
-                <div style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>MODE: GAAS_ENFORCEMENT</div>
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>MODE: KAVACH_ENFORCEMENT</div>
               </div>
             </div>
             
@@ -175,14 +177,14 @@ export default function PlaygroundPage() {
                     {result.input}
                   </div>
                   
-                  <div style={{ color: getStatusColor(result.response.decision), fontWeight: 700, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
-                    {getStatusIcon(result.response.decision)}
-                    {`GAAS DECISION: ${result.response.decision}`}
+                  <div style={{ color: getStatusColor(result.response.enforcement_decision), fontWeight: 700, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
+                    {getStatusIcon(result.response.enforcement_decision)}
+                    {`KAVACH DECISION: ${result.response.enforcement_decision}`}
                   </div>
 
                   <div style={{ background: '#ffffff03', border: '1px solid #ffffff10', padding: 16, borderRadius: 8 }}>
-                    {result.response.violations?.length > 0 ? (
-                      result.response.violations.map((v, i) => (
+                    {result.response.policy_violations?.length > 0 ? (
+                      result.response.policy_violations.map((v, i) => (
                         <div key={i} style={{ marginBottom: 12 }}>
                           <div style={{ color: '#ff7b72', fontWeight: 600, fontSize: 13 }}>• Violation: {v.policy_name}</div>
                           <div style={{ color: '#8b949e', fontSize: 11, marginLeft: 14, marginTop: 4 }}>

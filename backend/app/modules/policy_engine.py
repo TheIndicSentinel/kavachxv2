@@ -155,6 +155,28 @@ BUILT_IN_POLICIES = [
         "rules": [
             {"rule_id": "builtin-ctx-002", "condition": "multilingual_accuracy_gap", "threshold": 0.08, "action": "alert", "message": "Language accuracy gap exceeds +/- 8% equity threshold."},
         ]
+    },
+    {
+        "id": "builtin-shadow-ai",
+        "name": "Shadow AI & Tool Discovery",
+        "description": "Detects usage of unauthorized or public AI tools (e.g., ChatGPT, Claude) via browser traffic signatures.",
+        "policy_type": "compliance",
+        "severity": "high",
+        "jurisdiction": "GLOBAL",
+        "rules": [
+            {"rule_id": "builtin-shadow-ai-001", "condition": "unauthorized_tool_detected", "threshold": None, "action": "alert", "message": "Shadow AI Usage: Prompt sent to unauthorized external AI tool detected via browser signature."},
+        ]
+    },
+    {
+        "id": "builtin-informal-economy",
+        "name": "Economic Inclusion Policy",
+        "description": "Ensures AI models do not systematically exclude or penalize informal economy workers (BPL, daily wagers).",
+        "policy_type": "fairness",
+        "severity": "medium",
+        "jurisdiction": "IN",
+        "rules": [
+            {"rule_id": "builtin-iec-001", "condition": "economic_equity_gap", "threshold": 0.15, "action": "alert", "message": "High disparity in outcomes for informal economy/BPL segments."},
+        ]
     }
 ]
 
@@ -294,6 +316,15 @@ class PolicyEngine:
         # 4. Built-in system conditions
         elif condition == "risk_score_exceeds_threshold":
             return risk_score > (threshold or 0.85)
+
+        elif condition == "unauthorized_tool_detected":
+            return context.get("shadow_ai_detected") is True or input_data.get("external_tool_signature") is not None
+
+        elif condition == "economic_equity_gap":
+            disparity = next((f.get("disparity", 0) for f in fairness_results if f.get("metric") == "economic_equity"), None)
+            if disparity is not None:
+                return disparity > (threshold or 0.15)
+            return float(input_data.get("economic_proxy_score", 0)) > (threshold or 0.15)
 
         return False
 

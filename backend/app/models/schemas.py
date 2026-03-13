@@ -49,6 +49,7 @@ class GovernanceResult(BaseModel):
     enforcement_decision: EnforcementDecision
     fairness_flags: List[FairnessFlag]
     policy_violations: List[Dict[str, Any]]
+    risk_analysis: Optional[Dict[str, Any]] = {}
     explanation: ExplanationOutput
     timestamp: datetime
     processing_time_ms: float

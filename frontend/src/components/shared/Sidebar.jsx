@@ -23,7 +23,7 @@ const NAV = [
       { path: '/models',   label: 'Model Registry', icon: Database,    perm: 'models:read',   roles: ['super_admin','ml_engineer','compliance_officer','auditor'] },
       { path: '/audit',    label: 'Audit Logs',     icon: Activity,    perm: 'audit:read',    roles: ['super_admin','compliance_officer','auditor'] },
       { path: '/simulate', label: 'Batch Simulate', icon: PlayCircle,  perm: 'simulate:run',  roles: ['super_admin','ml_engineer'] },
-      { path: '/playground', label: 'GaaS Playground', icon: Terminal,   perm: 'dashboard:read' },
+      { path: '/playground', label: 'Kavach Playground', icon: Terminal,   perm: 'dashboard:read' },
     ],
   },
   {

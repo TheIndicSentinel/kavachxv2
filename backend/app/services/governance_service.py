@@ -49,9 +49,13 @@ class GovernanceService:
             except Exception:
                 pass
 
-        inference_data = {"input_data": request.input_data, "confidence": request.confidence, "context": request.context or {}}
+        inference_data = {
+            "input_data": request.input_data, 
+            "confidence": request.confidence, 
+            "context": request.context or {}
+        }
         
-        # Safety Scan fallback for raw text
+        # 1. Safety Scan for raw text (Shadow AI detection)
         if not request.input_data.get("toxicity_score") and not request.input_data.get("prompt_injection_score"):
             input_text = str(request.input_data.get("prompt", request.input_data.get("text", "")))
             output_text = str(request.prediction.get("content", request.prediction.get("text", "")))
@@ -61,11 +65,18 @@ class GovernanceService:
 
         flag_dicts = [f.model_dump() for f in fairness_flags]
         
-        # Policy & Risk Evaluation
+        # 2. Policy Evaluation (Pass 1)
         policy_violations, _ = self.policy_engine.evaluate(inference_data, flag_dicts, 0.0)
+        
+        # 3. Risk Scoring (Derived from violations + flags)
         risk_score = self.risk_scorer.compute(request.confidence, flag_dicts, policy_violations, request.context or {})
         risk_level = self.risk_scorer.get_risk_level(risk_score)
-        _, final_decision = self.policy_engine.evaluate(inference_data, flag_dicts, risk_score)
+        
+        # 4. Final Enforcement (Check if Risk Score itself triggers a policy block)
+        # We can now just check the risk-based rules manually or do a focused second pass if needed,
+        # but let's keep it clean by updating the decision if risk is too high.
+        violations_with_risk, final_decision = self.policy_engine.evaluate(inference_data, flag_dicts, risk_score)
+        policy_violations = violations_with_risk # Ensure final response has the risk violation if triggered
         
         # Explainability
         domain = (request.context or {}).get("domain", "default")
@@ -160,6 +171,13 @@ class GovernanceService:
             enforcement_decision=final_decision,
             fairness_flags=fairness_flags,
             policy_violations=policy_violations,
+            risk_analysis={
+                "composite_risk": risk_score,
+                "risk_level": risk_level.value,
+                "violation_count": len(policy_violations),
+                "fairness_flags": len(fairness_flags),
+                "shadow_ai_detected": context_metadata.get("shadow_ai_detected", False)
+            },
             explanation=ExplanationOutput(**explanation),
             timestamp=datetime.now(timezone.utc),
             processing_time_ms=processing_ms,
