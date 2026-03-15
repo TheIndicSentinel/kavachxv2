@@ -3,8 +3,6 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContaine
 import { modelsAPI, governanceAPI } from '../utils/api'
 import { Database, Cpu, CheckCircle, AlertCircle } from 'lucide-react'
 
-/* Same helper as ExecutiveDashboard — reads resolved CSS var values so
-   recharts SVG presentation attributes get real hex/rgb strings.        */
 function cssVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
 }
@@ -34,9 +32,22 @@ function useChartColors() {
   return c
 }
 
+// Decision → badge class AND color (single source of truth)
+const DECISION_CONFIG = {
+  PASS:         { badge: 'badge-pass',   color: 'var(--green)',  label: 'ALLOW' },
+  ALERT:        { badge: 'badge-alert',  color: 'var(--red)',  label: 'ALERT' },
+  HUMAN_REVIEW: { badge: 'badge-review', color: 'var(--orange)', label: 'REVIEW' },
+  BLOCK:        { badge: 'badge-block',  color: 'var(--red)',    label: 'BLOCK' },
+}
+
 const decisionBadge = (d) => {
-  const map = { PASS: 'badge-pass', ALERT: 'badge-alert', BLOCK: 'badge-block', HUMAN_REVIEW: 'badge-review' }
-  return <span className={`badge ${map[d] || 'badge-muted'}`}>{d}</span>
+  const cfg = DECISION_CONFIG[(d || '').toUpperCase()] || { badge: 'badge-muted', label: d }
+  return <span className={`badge ${cfg.badge}`}>{cfg.label}</span>
+}
+
+const decisionColor = (d) => {
+  const cfg = DECISION_CONFIG[(d || '').toUpperCase()]
+  return cfg ? cfg.color : 'var(--green)'
 }
 
 const TOOLTIP_STYLE = {
@@ -45,6 +56,7 @@ const TOOLTIP_STYLE = {
   borderRadius: 8,
   fontSize: 12,
 }
+
 export default function EngineerDashboard() {
   const [models, setModels] = useState([])
   const [inferences, setInferences] = useState([])
@@ -185,41 +197,62 @@ export default function EngineerDashboard() {
         <div className="table-wrap">
           <table>
             <thead>
-              <tr><th>Event ID</th><th>Model</th><th>Decision</th><th>Risk</th><th>Confidence</th><th>Flags</th><th>Time</th></tr>
+              <tr>
+                <th>Prompt</th>
+                <th>Model</th>
+                <th>Platform</th>
+                <th>Decision</th>
+                <th>Policy Triggered</th>
+                <th>Reason</th>
+                <th>Risk</th>
+                <th>Confidence</th>
+                <th>Time</th>
+              </tr>
             </thead>
             <tbody>
               {displayInferences.length === 0 && (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>No inferences yet. Use Simulate to generate data.</td></tr>
+                <tr><td colSpan={9} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>No inferences yet. Use the browser extension or Simulate to generate data.</td></tr>
               )}
-              {displayInferences.slice(0, 15).map(inf => (
-                <tr key={inf.id}>
-                  <td className="font-mono" style={{ fontSize: 11 }}>{inf.id?.slice(-8)}</td>
-                  <td style={{ fontSize: 12 }}>{inf.model_id}</td>
-                  <td>{decisionBadge(inf.enforcement_decision)}</td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div className="risk-bar" style={{ width: 50 }}>
-                        <div className="risk-fill" style={{
-                          width: (inf.risk_score || 0) * 100 + '%',
-                          background: inf.risk_score > 0.75 ? 'var(--red)' : inf.risk_score > 0.45 ? 'var(--amber)' : 'var(--green)',
-                        }} />
+              {displayInferences.slice(0, 20).map(inf => {
+                const prompt = inf.input_data?.prompt || inf.input_data?.text || '—'
+                const reason = inf.explanation?.reason || '—'
+                const platform = inf.input_data?.platform || inf.context_metadata?.platform || 'Universal'
+                const policyTriggered = inf.explanation?.policy_triggered || (inf.policy_violations?.[0]?.policy_name) || (reason === 'No policy violation detected.' ? '—' : 'System Rule')
+                
+                return (
+                  <tr key={inf.id}>
+                    <td style={{ fontSize: 11, color: 'var(--text)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={prompt}>
+                      {prompt.length > 50 ? prompt.substring(0, 50) + '…' : prompt}
+                    </td>
+                    <td style={{ fontSize: 11, fontFamily: 'var(--font-mono)' }}>{inf.model_id}</td>
+                    <td><span className="badge badge-info" style={{ fontSize: 9 }}>{platform}</span></td>
+                    <td>{decisionBadge(inf.enforcement_decision)}</td>
+                    <td style={{ fontSize: 11, color: 'var(--text-dim)', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={policyTriggered}>
+                      {policyTriggered}
+                    </td>
+                    <td style={{ fontSize: 11, color: 'var(--text-dim)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={reason}>
+                      {reason}
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div className="risk-bar" style={{ width: 50 }}>
+                          <div className="risk-fill" style={{
+                            width: (inf.risk_score || 0) * 100 + '%',
+                            background: decisionColor(inf.enforcement_decision),
+                          }} />
+                        </div>
+                        <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)' }}>
+                          {((inf.risk_score || 0) * 100).toFixed(0)}%
+                        </span>
                       </div>
-                      <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)' }}>
-                        {((inf.risk_score || 0) * 100).toFixed(0)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="font-mono" style={{ fontSize: 11 }}>{((inf.confidence || 0) * 100).toFixed(1)}%</td>
-                  <td>
-                    {inf.fairness_flags?.length > 0
-                      ? <span className="badge badge-alert">{inf.fairness_flags.length} flag{inf.fairness_flags.length > 1 ? 's' : ''}</span>
-                      : <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>—</span>}
-                  </td>
-                  <td style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                    {inf.timestamp ? new Date(inf.timestamp).toLocaleTimeString() : '—'}
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="font-mono" style={{ fontSize: 11 }}>{((inf.confidence || 0) * 100).toFixed(1)}%</td>
+                    <td style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                      {inf.timestamp ? new Date(inf.timestamp).toLocaleTimeString() : '—'}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

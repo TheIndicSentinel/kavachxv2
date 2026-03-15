@@ -53,6 +53,7 @@ class InferenceEvent(Base):
     explanation = Column(JSON)
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     context_metadata = Column(JSON, default=dict)
+    session_id = Column(String, index=True)
 
 
 class AuditLog(Base):
@@ -66,6 +67,9 @@ class AuditLog(Base):
     details = Column(JSON)
     risk_level = Column(String)
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    # Cryptographic-style integrity chain (hash of previous link + this payload)
+    prev_hash = Column(String, nullable=True)
+    chain_hash = Column(String, nullable=True, index=True)
 
 
 class FairnessMetric(Base):

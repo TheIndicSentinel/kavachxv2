@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            width: 280px;
+            padding: 16px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            margin: 0;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .logo {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #a5b4fc, #4f46e5);
+            border-radius: 6px;
+        }
+        .title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f0f6fc;
+        }
+        .status-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #238636;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .label {
+            font-size: 11px;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .value {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .footer {
+            font-size: 10px;
+            color: #8b949e;
+            text-align: center;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo"></div>
+        <div class="title">Kavach AI Shield</div>
+    </div>
+
+    <div class="status-card">
+        <div class="label">Protection Status</div>
+        <div style="display: flex; align-items: center;">
+            <div class="status-dot"></div>
+            <div class="value">Active & Enforcing</div>
+        </div>
+    </div>
+
+    <div class="status-card">
+        <div class="label">Connected Node</div>
+        <div class="value" id="node-name">KavachX Render Cloud</div>
+    </div>
+
+    <div class="footer">
+        Every prompt you send to AI tools is filtered for safety, fairness, and compliance by the Kavach Governance Engine.
+    </div>
+
+    <script>
+        // Placeholder for future dynamic status updates
+    </script>
+</body>
+</html>

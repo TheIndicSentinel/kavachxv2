@@ -21,7 +21,7 @@ BUILT_IN_POLICIES = [
         "severity": "high",
         "jurisdiction": "IN",
         "rules": [
-            {"rule_id": "builtin-rbi-003", "condition": "debt_ratio_exceeds_threshold", "threshold": 0.40, "action": "alert", "message": "Debt-to-Income ratio exceeds RBI 40% cap."},
+            {"rule_id": "builtin-rbi-003", "condition": "debt_ratio_exceeds_threshold", "threshold": 0.40, "action": "human_review", "message": "RBI Advisory: Debt-to-Income ratio (55%) requires manual review for secondary factors."},
         ]
     },
     {
@@ -44,6 +44,39 @@ BUILT_IN_POLICIES = [
         "jurisdiction": "IN",
         "rules": [
             {"rule_id": "builtin-dpdp-001", "condition": "personal_data_without_consent", "threshold": None, "action": "block", "message": "DPDP Act violation: Personal data processed without verifiable consent."},
+        ]
+    },
+    {
+        "id": "builtin-financial-safety",
+        "name": "AML & Anti-Fraud Guard",
+        "description": "Blocks prompts related to money laundering, tax evasion, and financial crimes.",
+        "policy_type": "compliance",
+        "severity": "critical",
+        "jurisdiction": "GLOBAL",
+        "rules": [
+            {"rule_id": "builtin-aml-001", "condition": "financial_crime_detected", "threshold": 0.70, "action": "block", "message": "High-risk indicator of financial crime (Hawala/Laundering) detected."},
+        ]
+    },
+    {
+        "id": "builtin-self-harm",
+        "name": "Self-Harm Prevention",
+        "description": "Detects and blocks content related to suicide or self-harm.",
+        "policy_type": "safety",
+        "severity": "critical",
+        "jurisdiction": "GLOBAL",
+        "rules": [
+            {"rule_id": "builtin-sh-001", "condition": "self_harm_detected", "threshold": 0.70, "action": "block", "message": "Critical: Self-harm or suicide intent detected. Prompt blocked for safety."},
+        ]
+    },
+    {
+        "id": "builtin-violence-prevention",
+        "name": "Violence Prevention Guard",
+        "description": "Protects against prompts related to weapons, bombs, and physical violence.",
+        "policy_type": "safety",
+        "severity": "critical",
+        "jurisdiction": "GLOBAL",
+        "rules": [
+            {"rule_id": "builtin-v-001", "condition": "violence_detected", "threshold": 0.70, "action": "block", "message": "Critical: Violent content or dangerous activities detected. Prompt blocked."},
         ]
     },
     {
@@ -157,14 +190,14 @@ BUILT_IN_POLICIES = [
         ]
     },
     {
-        "id": "builtin-shadow-ai",
-        "name": "Shadow AI & Tool Discovery",
-        "description": "Detects usage of unauthorized or public AI tools (e.g., ChatGPT, Claude) via browser traffic signatures.",
+        "id": "builtin-external-ai",
+        "name": "Kavach Sentinel - External AI Governance",
+        "description": "Monitors usage of external AI platforms (ChatGPT, Claude, Gemini, Copilot, etc.)",
         "policy_type": "compliance",
-        "severity": "high",
+        "severity": "low",
         "jurisdiction": "GLOBAL",
         "rules": [
-            {"rule_id": "builtin-shadow-ai-001", "condition": "unauthorized_tool_detected", "threshold": None, "action": "alert", "message": "Shadow AI Usage: Prompt sent to unauthorized external AI tool detected via browser signature."},
+            {"rule_id": "builtin-external-ai-001", "condition": "unauthorized_tool_detected", "threshold": None, "action": "alert", "message": "External AI platform usage logged for compliance monitoring."},
         ]
     },
     {
@@ -175,7 +208,8 @@ BUILT_IN_POLICIES = [
         "severity": "medium",
         "jurisdiction": "IN",
         "rules": [
-            {"rule_id": "builtin-iec-001", "condition": "economic_equity_gap", "threshold": 0.15, "action": "alert", "message": "High disparity in outcomes for informal economy/BPL segments."},
+            {"rule_id": "builtin-iec-001", "condition": "economic_equity_gap", "threshold": 0.15, "action": "alert", "message": "Economic Diversity Alert: Minor outcomes disparity (18%) detected for informal economy segments."},
+            {"rule_id": "builtin-iec-002", "condition": "economic_equity_gap", "threshold": 0.30, "action": "block", "message": "Regulatory Block: Systematic exclusion of informal economy/BPL segments detected."},
         ]
     }
 ]
@@ -280,6 +314,18 @@ class PolicyEngine:
             inject = input_data.get("prompt_injection_score", 0)
             return inject > (threshold or 0.70)
 
+        elif condition == "financial_crime_detected":
+            score = input_data.get("financial_crime_score", 0)
+            return score > (threshold or 0.70)
+
+        elif condition == "self_harm_detected":
+            score = input_data.get("self_harm_score", 0)
+            return score > (threshold or 0.70)
+
+        elif condition == "violence_detected":
+            score = input_data.get("violence_score", 0)
+            return score > (threshold or 0.70)
+
         # 3. Compliance conditions
         elif condition == "debt_ratio_exceeds_threshold":
             ratio = input_data.get("debt_ratio", 0)
@@ -315,7 +361,7 @@ class PolicyEngine:
 
         # 4. Built-in system conditions
         elif condition == "risk_score_exceeds_threshold":
-            return risk_score > (threshold or 0.85)
+            return risk_score > (threshold or 0.70)
 
         elif condition == "unauthorized_tool_detected":
             return context.get("shadow_ai_detected") is True or input_data.get("external_tool_signature") is not None
@@ -330,9 +376,18 @@ class PolicyEngine:
 
 
     def _map_action(self, action: str) -> EnforcementDecision:
-        mapping = {
-            "alert": EnforcementDecision.ALERT,
-            "human_review": EnforcementDecision.HUMAN_REVIEW,
-            "block": EnforcementDecision.BLOCK,
-        }
-        return mapping.get(action, EnforcementDecision.PASS)
+        """
+        Map rule actions into the enforcement hierarchy.
+        'suspend' is treated as a hard BLOCK at inference level;
+        suspension of the model itself is enforced by higher layers.
+        """
+        normalized = str(action or "").lower()
+        if normalized in ("allow", "pass"):
+            return EnforcementDecision.PASS
+        if normalized == "alert":
+            return EnforcementDecision.ALERT
+        if normalized in ("human_review", "review"):
+            return EnforcementDecision.HUMAN_REVIEW
+        if normalized in ("block", "suspend", "suspension"):
+            return EnforcementDecision.BLOCK
+        return EnforcementDecision.PASS

@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.db.database import init_db
-from app.api import governance, policies, audit, dashboard, models, ws, settings as settings_api
+from app.api import governance, policies, audit, dashboard, models, ws, proxy, settings as settings_api
 print(f"DEBUG: GOVERNANCE MODULE LOADED FROM: {governance.__file__}")
 from app.api import auth as auth_router
 from app.core.config import settings
@@ -41,6 +41,7 @@ app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["Dashboar
 app.include_router(models.router, prefix="/api/v1/models", tags=["Models"])
 app.include_router(ws.router, prefix="/api/v1/ws", tags=["WebSockets"])
 app.include_router(settings_api.router, prefix="/api/v1/settings", tags=["Settings"])
+app.include_router(proxy.router, prefix="/api/v1/proxy", tags=["Proxy"])
 
 
 @app.get("/health")

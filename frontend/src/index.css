@@ -36,6 +36,7 @@
   --red:    #dc2626; --red-light:    rgba(220,38,38,0.08);
   --amber:  #d97706; --amber-light:  rgba(217,119,6,0.09);
   --purple: #7c3aed; --purple-light: rgba(124,58,237,0.09);
+  --orange: #f59e0b; --orange-light: rgba(245,158,11,0.09);
   --cyan:   #0891b2; --cyan-light:   rgba(8,145,178,0.09);
 
   --grad-accent: linear-gradient(135deg, #a5b4fc 0%, #4f46e5 50%, #1e1b4b 100%);
@@ -88,6 +89,7 @@
   --red:    #f87171; --red-light:    rgba(248,113,113,0.10);
   --amber:  #fbbf24; --amber-light:  rgba(251,191,36,0.10);
   --purple: #a78bfa; --purple-light: rgba(167,139,250,0.10);
+  --orange: #fbbf24; --orange-light: rgba(251,191,36,0.10);
   --cyan:   #22d3ee; --cyan-light:   rgba(34,211,238,0.10);
 
   --grad-accent: linear-gradient(135deg,#6366f1 0%,#a855f7 100%);
@@ -208,7 +210,8 @@ input,select,textarea{font-family:inherit}
 .badge-pass,.badge-active,.badge-healthy{background:var(--green-light);color:var(--green)}
 .badge-alert,.badge-warning,.badge-medium{background:var(--amber-light);color:var(--amber)}
 .badge-block,.badge-critical,.badge-high{background:var(--red-light);color:var(--red)}
-.badge-review,.badge-low{background:var(--purple-light);color:var(--purple)}
+.badge-review{background:var(--orange-light);color:var(--orange)}
+.badge-low{background:var(--purple-light);color:var(--purple)}
 .badge-info,.badge-pending{background:var(--accent-light);color:var(--accent)}
 .badge-muted{background:var(--bg-elevated);color:var(--text-muted)}
 .badge-baseline{background:linear-gradient(135deg,rgba(79,70,229,0.09),rgba(124,58,237,0.09));color:var(--accent-2);border:1px solid rgba(99,102,241,0.18)}

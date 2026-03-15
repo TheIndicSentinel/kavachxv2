@@ -14,10 +14,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours
 
     # Governance thresholds
-    RISK_SCORE_HIGH_THRESHOLD: float = 0.75
-    RISK_SCORE_MEDIUM_THRESHOLD: float = 0.45
+    RISK_SCORE_HIGH_THRESHOLD: float = 0.60
+    RISK_SCORE_MEDIUM_THRESHOLD: float = 0.20
     FAIRNESS_DISPARITY_THRESHOLD: float = 0.20
-    CONFIDENCE_LOW_THRESHOLD: float = 0.60
+    CONFIDENCE_LOW_THRESHOLD: float = 0.55
 
     class Config:
         env_file = ".env"

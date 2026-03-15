@@ -5,18 +5,6 @@ import { Download, Search, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-r
 const EVENT_TYPES = ['all', 'inference_evaluated', 'policy_violated', 'model_blocked', 'model_registered', 'policy_created']
 const PAGE_SIZE = 15
 
-const MOCK_LOGS = Array.from({ length: 80 }, (_, i) => {
-  const MODELS = ['credit-scoring-v3', 'hiring-screener-v2', 'content-moderation-llm', 'loan-approval-ml']
-  const EVENTS = ['inference_evaluated', 'policy_violated', 'model_blocked', 'model_registered', 'policy_created']
-  return {
-    id: `log-${i}`, event_type: EVENTS[i % 5], entity_id: MODELS[i % 4],
-    actor: ['governance-engine', 'admin@kavachx.ai', 'ml-engineer@kavachx.ai'][i % 3],
-    action: ['evaluate', 'block', 'alert', 'register'][i % 4],
-    risk_level: ['high', 'medium', 'low'][i % 3],
-    timestamp: new Date(Date.now() - i * 900000).toISOString(),
-  }
-})
-
 function Pagination({ page, total, pageSize, onChange }) {
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
   if (totalPages <= 1) return null
@@ -47,13 +35,19 @@ function Pagination({ page, total, pageSize, onChange }) {
   )
 }
 
+const DECISION_BADGE = {
+  PASS: 'badge-pass', ALLOW: 'badge-pass',
+  ALERT: 'badge-alert',
+  HUMAN_REVIEW: 'badge-review', REVIEW: 'badge-review',
+  BLOCK: 'badge-block',
+}
+
 export default function AuditPage() {
-  const [logs, setLogs] = useState(MOCK_LOGS)
-  const [loading, setLoading] = useState(false)
+  const [logs, setLogs] = useState([])
+  const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
-  const firstLoad = { current: true }
 
   const load = useCallback(async (showSpinner = false) => {
     if (showSpinner) setLoading(true)
@@ -61,42 +55,50 @@ export default function AuditPage() {
       const params = { limit: 200 }
       if (filter !== 'all') params.event_type = filter
       const r = await auditAPI.getLogs(params)
-      setLogs(Array.isArray(r.data) && r.data.length > 0 ? r.data : MOCK_LOGS)
-    } catch { setLogs(MOCK_LOGS) }
-    finally { if (showSpinner) setLoading(false) }
+      setLogs(Array.isArray(r.data) && r.data.length > 0 ? r.data : [])
+    } catch { setLogs([]) }
+    finally { if (showSpinner) setLoading(false); else setLoading(false) }
   }, [filter])
 
-  // Initial mount: silent background refresh (table already shows mock data)
-  useEffect(() => { load(false) }, []) // eslint-disable-line react-hooks/exhaustive-deps
-  // Filter changes: show spinner since we're swapping visible data
+  useEffect(() => { load(true) }, []) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { load(true); setPage(1) }, [filter]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Refresh when simulation creates new events
   useEffect(() => {
     const handler = () => { load(false) }
     window.addEventListener('kavachx:simulation-complete', handler)
     return () => window.removeEventListener('kavachx:simulation-complete', handler)
   }, [load])
 
-  // Reset page on search change
   useEffect(() => { setPage(1) }, [search])
 
   const filtered = search
     ? logs.filter(l =>
       l.event_type?.toLowerCase().includes(search.toLowerCase()) ||
       l.actor?.toLowerCase().includes(search.toLowerCase()) ||
-      l.entity_id?.toLowerCase().includes(search.toLowerCase())
+      l.entity_id?.toLowerCase().includes(search.toLowerCase()) ||
+      l.details?.prompt?.toLowerCase().includes(search.toLowerCase()) ||
+      l.details?.reason?.toLowerCase().includes(search.toLowerCase())
     )
     : logs
 
   const totalFiltered = filtered.length
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-  const riskBadge = (r) => ({ high: 'badge-block', medium: 'badge-alert', low: 'badge-pass' }[r] || 'badge-muted')
+  const riskBadge = (r) => ({ high: 'badge-block', critical: 'badge-block', medium: 'badge-alert', low: 'badge-pass' }[r] || 'badge-muted')
 
-  const exportCSV = () => {
-    const rows = [['Timestamp', 'Event Type', 'Entity ID', 'Actor', 'Action', 'Risk'].join(',')]
+    const exportCSV = () => {
+    const rows = [['Timestamp', 'Session ID', 'Event Type', 'Decision', 'Risk Score', 'Risk Level', 'Prompt', 'Policy Triggered', 'Reason', 'Model', 'Platform'].join(',')]
     filtered.forEach(l => rows.push([
-      new Date(l.timestamp).toISOString(), l.event_type, l.entity_id || '', l.actor || '', l.action || '', l.risk_level || ''
+      new Date(l.timestamp).toISOString(),
+      l.details?.session_id || '',
+      l.event_type,
+      l.details?.decision || l.action || '',
+      l.details?.risk_score || '',
+      l.risk_level || '',
+      `"${(l.details?.prompt || '').replace(/"/g, "'")}"`,
+      l.details?.policy_triggered || '',
+      `"${(l.details?.reason || '').replace(/"/g, "'")}"`,
+      l.actor || '',
+      l.details?.platform || ''
     ].join(',')))
     const blob = new Blob([rows.join('\n')], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
@@ -124,7 +126,7 @@ export default function AuditPage() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
         <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
           <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input className="form-input" style={{ paddingLeft: 32 }} placeholder="Search logs…"
+          <input className="form-input" style={{ paddingLeft: 32 }} placeholder="Search by prompt, reason, actor…"
             value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <div className="filter-pills">
@@ -153,22 +155,59 @@ export default function AuditPage() {
             <div className="table-wrap">
               <table>
                 <thead>
-                  <tr><th>Timestamp</th><th>Event Type</th><th>Entity</th><th>Actor</th><th>Action</th><th>Risk</th><th>Details</th></tr>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Session ID</th>
+                    <th>Event</th>
+                    <th>Prompt</th>
+                    <th>Decision</th>
+                    <th>Risk</th>
+                    <th>Policy Triggered</th>
+                    <th>Reason</th>
+                    <th>Platform</th>
+                    <th>Model</th>
+                  </tr>
                 </thead>
                 <tbody>
-                  {paginated.map(l => (
-                    <tr key={l.id}>
-                      <td className="font-mono" style={{ fontSize: 11, whiteSpace: 'nowrap' }}>{new Date(l.timestamp).toLocaleString()}</td>
-                      <td><span className="badge badge-info">{l.event_type?.replace(/_/g, ' ')}</span></td>
-                      <td className="font-mono" style={{ fontSize: 11 }}>{l.entity_id?.slice(-12) || '—'}</td>
-                      <td style={{ fontSize: 12 }}>{l.actor || '—'}</td>
-                      <td style={{ fontSize: 12, color: 'var(--text-dim)' }}>{l.action || '—'}</td>
-                      <td>{l.risk_level ? <span className={`badge ${riskBadge(l.risk_level)}`}>{l.risk_level}</span> : '—'}</td>
-                      <td style={{ fontSize: 11, color: 'var(--text-muted)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {l.details ? JSON.stringify(l.details).slice(0, 60) + '…' : '—'}
-                      </td>
-                    </tr>
-                  ))}
+                  {paginated.map(l => {
+                    const decision = l.details?.decision || l.action || '—'
+                    const prompt = l.details?.prompt || '—'
+                    const reason = l.details?.reason || '—'
+                    const policy = l.details?.policy_triggered || '—'
+                    const platform = l.details?.platform || '—'
+                    const sessionId = l.details?.session_id || '—'
+                    const riskScore = l.details?.risk_score != null ? (l.details.risk_score * 100).toFixed(0) + '%' : '—'
+                    
+                    return (
+                      <tr key={l.id}>
+                        <td className="font-mono" style={{ fontSize: 11, whiteSpace: 'nowrap' }}>{new Date(l.timestamp).toLocaleString()}</td>
+                        <td className="font-mono" style={{ fontSize: 10, color: 'var(--text-muted)' }}>{sessionId.substring(0,8)}...</td>
+                        <td><span className="badge badge-info">{l.event_type?.replace(/_/g, ' ')}</span></td>
+                        <td style={{ fontSize: 11, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={prompt}>
+                          {prompt.length > 40 ? prompt.substring(0, 40) + '…' : prompt}
+                        </td>
+                        <td>
+                          {decision !== '—' ? (
+                            <span className={`badge ${DECISION_BADGE[decision.toUpperCase()] || 'badge-muted'}`}>{decision}</span>
+                          ) : '—'}
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            {l.risk_level ? <span className={`badge ${riskBadge(l.risk_level)}`}>{l.risk_level}</span> : null}
+                            <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>{riskScore}</span>
+                          </div>
+                        </td>
+                        <td style={{ fontSize: 11, color: 'var(--text-dim)', maxWidth: 130, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={policy}>
+                          {policy}
+                        </td>
+                        <td style={{ fontSize: 11, color: 'var(--text-muted)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={reason}>
+                          {reason}
+                        </td>
+                        <td style={{ fontSize: 11, color: 'var(--text-dim)' }}>{platform}</td>
+                        <td style={{ fontSize: 11, fontFamily: 'var(--font-mono)' }}>{l.actor || '—'}</td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>

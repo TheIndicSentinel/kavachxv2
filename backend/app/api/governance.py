@@ -88,6 +88,8 @@ async def get_recent_inferences(skip: int = Query(default=0, ge=0), limit: int =
             "id": i.id, "model_id": i.model_id, "risk_score": i.risk_score,
             "enforcement_decision": i.enforcement_decision, "confidence": i.confidence,
             "fairness_flags": i.fairness_flags or [], "policy_violations": i.policy_violations or [],
+            "explanation": i.explanation or {},
+            "input_data": i.input_data or {},
             "timestamp": _fmt_ts(i.timestamp),
         }
         for i in inferences
@@ -131,6 +133,8 @@ async def list_inferences(
             "risk_score": e.risk_score, "confidence": e.confidence,
             "fairness_flags": e.fairness_flags or [],
             "policy_violations": e.policy_violations or [],
+            "explanation": e.explanation or {},
+            "input_data": e.input_data or {},
             "timestamp": _fmt_ts(e.timestamp),
         }
         for e in events

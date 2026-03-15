@@ -27,6 +27,7 @@ class InferenceRequest(BaseModel):
     prediction: Dict[str, Any]
     confidence: float = Field(ge=0.0, le=1.0)
     context: Optional[Dict[str, Any]] = {}
+    session_id: Optional[str] = None
 
 class FairnessFlag(BaseModel):
     metric: str
@@ -40,6 +41,8 @@ class ExplanationOutput(BaseModel):
     top_features: List[Dict[str, Any]]
     summary: str
     confidence_note: str
+    reason: Optional[str] = None
+    policy_triggered: Optional[str] = None
 
 class GovernanceResult(BaseModel):
     inference_id: str
