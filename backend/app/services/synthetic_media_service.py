@@ -7,8 +7,10 @@ evidence bundles for legal admissibility.
 
 Architecture (Industry Standard flow — swap detector with env var only):
 
-  MediaDetector  ─┬─ MockMediaDetector   (SYNTHETIC_MEDIA_MODE=mock,  no network)
-                  └─ APIMediaDetector    (SYNTHETIC_MEDIA_MODE=api,    HTTP call)
+  MediaDetector  ─┬─ MockMediaDetector     (SYNTHETIC_MEDIA_MODE=mock,  no network)
+                  ├─ APIMediaDetector      (SYNTHETIC_MEDIA_MODE=api,   HTTP call)
+                  ├─ FallbackChainDetector (sequential API tier fallback)
+                  └─ ConsensusDetector     (parallel API + local; math beats probability)
         │
         ▼  detection result
   SyntheticMediaShieldService.scan()
@@ -1384,6 +1386,145 @@ class LocalModelMediaDetector(MediaDetector):
         )
 
 
+class ConsensusDetector(MediaDetector):
+    """
+    Parallel consensus engine: runs the API detector chain AND the local
+    heuristic simultaneously, then blends results using a determinism-first
+    policy.
+
+    Rationale:
+      Probabilistic API models can be fooled by adversarial inputs and novel
+      synthesis techniques.  Deterministic forensic signals (ELA, FFT, embedded
+      metadata, perceptual hash cache) are mathematically derived and far harder
+      to evade.  When the API says "authentic" but the math disagrees, this
+      engine sides with the math — a principle adopted by Intel FakeCatcher and
+      Truepic's provenance platform.
+
+    Blending rule:
+      If api_confidence < CONSENSUS_API_THRESHOLD
+         AND deterministic_signal_sum >= DETERMINISM_FLOOR:
+             final = max(api_conf, local_conf * DETERMINISM_WEIGHT)
+      Otherwise: API result is authoritative (API was confident).
+
+    Compliance:
+      Both results are logged in raw_response for full audit trail.
+      "consensus_used" flag lets compliance officers review any overrides.
+    """
+
+    _CONSENSUS_API_THRESHOLD = 0.50   # below this, API is not confident → consider local
+    _DETERMINISM_FLOOR       = 0.18   # sum of deterministic signals needed to trigger override
+    _DETERMINISM_WEIGHT      = 0.85   # scale factor when lifting local confidence
+
+    # Signals derived from mathematical analysis (not probabilistic); carry override weight
+    _DETERMINISTIC_KEYS: frozenset = frozenset({
+        "ai_png_metadata",
+        "ai_byte_signature",
+        "ai_exif_software",
+        "ai_tool_in_exif",
+        "known_ai_hash_match",
+        "ela_compression_ratio",
+        "fft_grid_artifact",
+        "video_frame_ai_signals",
+    })
+
+    def __init__(self, api_detector: MediaDetector, local_detector: "MockMediaDetector") -> None:
+        self._api   = api_detector
+        self._local = local_detector
+
+    async def detect(self, content: bytes, content_type: Optional[str] = None) -> DetectionResult:
+        # Run API and local forensics in parallel — total latency = max(api_time, local_time)
+        api_task   = asyncio.create_task(self._api.detect(content, content_type))
+        local_task = asyncio.create_task(self._local.detect(content, content_type))
+
+        api_result:   Optional[DetectionResult] = None
+        local_result: Optional[DetectionResult] = None
+
+        try:
+            api_result = await api_task
+        except Exception as exc:
+            logger.info("ConsensusDetector: API tier failed (%s) — using local only", exc)
+
+        try:
+            local_result = await local_task
+        except Exception as exc:
+            logger.warning("ConsensusDetector: Local tier failed (%s)", exc)
+
+        # ── Degenerate cases ──────────────────────────────────────────────────
+        if api_result is None and local_result is None:
+            raise RuntimeError("ConsensusDetector: both API and local detectors failed")
+
+        if api_result is None:
+            raw = local_result.raw_response or {}
+            raw.update({"detection_tier": "local_only", "fallback_used": True, "fallback_tier": "local_only"})
+            local_result.raw_response = raw
+            return local_result
+
+        if local_result is None:
+            raw = api_result.raw_response or {}
+            raw["detection_tier"] = "api_only"
+            api_result.raw_response = raw
+            return api_result
+
+        # ── Consensus blending ────────────────────────────────────────────────
+        api_conf      = api_result.confidence
+        local_conf    = local_result.confidence
+        local_signals = (local_result.raw_response or {}).get("signals", {})
+
+        deterministic_sum = sum(
+            v for k, v in local_signals.items() if k in self._DETERMINISTIC_KEYS
+        )
+
+        use_consensus = (
+            api_conf < self._CONSENSUS_API_THRESHOLD and
+            deterministic_sum >= self._DETERMINISM_FLOOR
+        )
+
+        if use_consensus:
+            blended      = min(0.95, max(api_conf, local_conf * self._DETERMINISM_WEIGHT))
+            is_synthetic = blended >= MockMediaDetector._ENFORCEMENT_THRESHOLD
+            labels       = list(dict.fromkeys(api_result.labels + local_result.labels))
+            raw          = {
+                **(api_result.raw_response or {}),
+                "detection_tier":     "consensus",
+                "consensus_used":     True,
+                "api_confidence":     round(api_conf, 4),
+                "local_confidence":   round(local_conf, 4),
+                "deterministic_sum":  round(deterministic_sum, 4),
+                "blended_confidence": round(blended, 4),
+                "consensus_note":     (
+                    "Deterministic forensic signals exceeded API confidence — "
+                    "local evidence lifted the verdict (math beats probability)."
+                ),
+                "local_signals":      {k: round(v, 4) for k, v in local_signals.items()},
+                "signal_categories":  (local_result.raw_response or {}).get("signal_categories", {}),
+            }
+            logger.info(
+                "ConsensusDetector: override — api=%.3f local=%.3f det_sum=%.3f → blended=%.3f",
+                api_conf, local_conf, deterministic_sum, blended,
+            )
+            return DetectionResult(
+                detector     = "consensus",
+                is_synthetic = is_synthetic,
+                confidence   = round(blended, 4),
+                labels       = labels,
+                raw_response = raw,
+            )
+
+        # API is confident or local signals are weak — API is authoritative.
+        # Still enrich raw_response with local signal summary for audit trail.
+        raw = api_result.raw_response or {}
+        raw.update({
+            "detection_tier":    "api_authoritative",
+            "consensus_used":    False,
+            "local_confidence":  round(local_conf, 4),
+            "deterministic_sum": round(deterministic_sum, 4),
+        })
+        if local_signals:
+            raw["local_signals"] = {k: round(v, 4) for k, v in local_signals.items()}
+        api_result.raw_response = raw
+        return api_result
+
+
 class FallbackChainDetector(MediaDetector):
     """
     Multi-tier detector that tries a prioritised list of backends in order.
@@ -1595,23 +1736,25 @@ class SyntheticMediaShieldService:
             url2 = getattr(settings, "SYNTHETIC_MEDIA_API_URL_2", "").strip()
             key2 = getattr(settings, "SYNTHETIC_MEDIA_API_KEY_2", "").strip()
 
-            tiers = [(APIMediaDetector(api_url=url1, api_key=key1), "primary_api")]
-
+            # Build API-only fallback chain (bridge tier if configured)
+            api_tiers = [(APIMediaDetector(api_url=url1, api_key=key1), "primary_api")]
             if url2:
-                tiers.append((APIMediaDetector(api_url=url2, api_key=key2), "secondary_api"))
+                api_tiers.append((APIMediaDetector(api_url=url2, api_key=key2), "secondary_api"))
                 logger.info(
-                    "SyntheticMediaShield: detector → FallbackChain [primary=%s, bridge=%s, local_heuristic]",
+                    "SyntheticMediaShield: detector → Consensus["
+                    "FallbackChain(primary=%s, bridge=%s) + local_heuristic]",
                     url1, url2,
                 )
             else:
                 logger.info(
-                    "SyntheticMediaShield: detector → FallbackChain [primary=%s, local_heuristic]",
+                    "SyntheticMediaShield: detector → Consensus[primary=%s + local_heuristic]",
                     url1,
                 )
 
-            # Local heuristic is always the final safety net
-            tiers.append((MockMediaDetector(), "local_heuristic"))
-            return FallbackChainDetector(tiers)
+            # ConsensusDetector: API chain and local heuristic run in parallel.
+            # Deterministic forensic signals can override a low-confidence API result.
+            api_chain = FallbackChainDetector(api_tiers) if url2 else APIMediaDetector(api_url=url1, api_key=key1)
+            return ConsensusDetector(api_detector=api_chain, local_detector=MockMediaDetector())
 
         if mode == "onnx":
             model_path  = getattr(settings, "SYNTHETIC_MEDIA_ONNX_MODEL_PATH", "").strip()

@@ -144,6 +144,15 @@ async def bootstrap(body: BootstrapRequest, request: Request, db: AsyncSession =
     await db.commit()
     await db.refresh(user)
 
+    # Clean up the token file written at startup (security hygiene)
+    import os as _os
+    _token_path = _os.environ.get("BOOTSTRAP_TOKEN_PATH", "./kavachx_setup_token.txt")
+    try:
+        if _os.path.exists(_token_path):
+            _os.remove(_token_path)
+    except Exception:
+        pass  # Non-fatal — file may not exist in all deployment environments
+
     access_token = create_access_token(
         {"sub": user.email},
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),

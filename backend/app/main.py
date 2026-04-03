@@ -33,15 +33,46 @@ logger = logging.getLogger("kavachx")
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    """Add security headers to every response."""
+    """
+    Apply industry-standard security headers to every HTTP response.
+
+    References:
+      OWASP Secure Headers Project — https://owasp.org/www-project-secure-headers/
+      MDN Content Security Policy  — https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+    """
+    # Content-Security-Policy: restrict resource origins to same-site.
+    # 'unsafe-inline' is required for React's style-injected CSS-in-JS.
+    # 'unsafe-eval' is NOT included — no eval() in production bundles.
+    _CSP = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: blob: https:; "
+        "connect-src 'self' ws: wss: https:; "
+        "font-src 'self' data:; "
+        "media-src 'self' blob:; "
+        "object-src 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self'; "
+        "frame-ancestors 'none';"
+    )
+
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
-        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["X-Content-Type-Options"]  = "nosniff"
+        response.headers["X-Frame-Options"]         = "DENY"
+        response.headers["Referrer-Policy"]         = "strict-origin-when-cross-origin"
+        response.headers["X-XSS-Protection"]        = "1; mode=block"
+        response.headers["Content-Security-Policy"] = self._CSP
+        response.headers["Permissions-Policy"]      = (
+            "camera=(), microphone=(), geolocation=(), payment=(), "
+            "usb=(), bluetooth=(), serial=()"
+        )
+        response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
         if settings.ENVIRONMENT == "production":
-            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+            response.headers["Strict-Transport-Security"] = (
+                "max-age=63072000; includeSubDomains; preload"
+            )
         return response
 
 

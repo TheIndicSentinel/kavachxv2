@@ -211,8 +211,17 @@ def _hash_token(token: str) -> str:
 async def ensure_bootstrap_token(db: AsyncSession) -> None:
     """
     Called at startup.  If no users exist and no valid token is active,
-    generate a new bootstrap token and print it to the server log.
+    generate a new bootstrap token, write it to disk (Jenkins-style), and
+    print a clickable setup URL to the server log.
+
+    The file path is controlled by the BOOTSTRAP_TOKEN_PATH environment
+    variable (default: ./kavachx_setup_token.txt).  On cloud deployments
+    where real-time console access is unavailable, operators can retrieve
+    the token via the platform file manager or a secure SSH command.
+
+    The file is automatically deleted once the bootstrap form is submitted.
     """
+    import os
     from app.models.orm_models import User, BootstrapToken
     from sqlalchemy import func
 
@@ -237,13 +246,35 @@ async def ensure_bootstrap_token(db: AsyncSession) -> None:
     db.add(BootstrapToken(token_hash=token_hash, expires_at=expires))
     await db.commit()
 
-    border = "=" * 64
+    # ── Write token to file (Jenkins / Grafana approach) ──────────────────
+    token_path = os.environ.get("BOOTSTRAP_TOKEN_PATH", "./kavachx_setup_token.txt")
+    token_abs  = ""
+    try:
+        with open(token_path, "w") as fh:
+            fh.write("KavachX First-Run Bootstrap Token\n")
+            fh.write("=" * 40 + "\n")
+            fh.write(f"Token   : {token}\n")
+            fh.write(f"Expires : {expires.strftime('%Y-%m-%d %H:%M UTC')}\n")
+            fh.write("\n")
+            fh.write("This file is deleted automatically after the Super Admin\n")
+            fh.write("account is created.  Keep it confidential.\n")
+        token_abs = os.path.abspath(token_path)
+    except Exception as write_err:
+        logger.warning("Could not write bootstrap token to file: %s", write_err)
+
+    # ── Print setup banner to console ────────────────────────────────────
+    border = "=" * 68
     print(f"\n{border}")
-    print("  KAVACHX — FIRST RUN SETUP")
+    print("  KAVACHX — FIRST RUN SETUP REQUIRED")
     print(f"")
-    print(f"  Bootstrap Token  :  {token}")
-    print(f"  Expires          :  {expires.strftime('%Y-%m-%d %H:%M UTC')}")
+    print(f"  Bootstrap Token : {token}")
+    print(f"  Expires         : {expires.strftime('%Y-%m-%d %H:%M UTC')}")
+    if token_abs:
+        print(f"  Token file      : {token_abs}")
     print(f"")
-    print(f"  Open the app, click 'First Run Setup', and enter this token")
-    print(f"  to create your Super Admin account.  Token is single-use.")
+    print(f"  Quick-setup URL  (pre-fills the token in the browser):")
+    print(f"    /login?setup_token={token}")
+    print(f"")
+    print(f"  Or open the app, click 'First Run Setup', and paste the token.")
+    print(f"  Token is single-use and is deleted after the account is created.")
     print(f"{border}\n")

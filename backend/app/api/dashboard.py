@@ -67,9 +67,11 @@ async def get_risk_trend(hours: int = 24, db: AsyncSession = Depends(get_db)):
     buckets = [[] for _ in range(hours)]
     for e in events:
         ts = ensure_naive(e.timestamp)
-        if ts and ts >= since:
+        now_naive = datetime.utcnow()
+        since_naive = now_naive - timedelta(hours=hours)
+        if ts and ts >= since_naive:
             # Which hour bucket does this fall in?
-            elapsed_seconds = (now - ts).total_seconds()
+            elapsed_seconds = (now_naive - ts).total_seconds()
             bucket_idx = max(0, min(hours - 1, hours - 1 - int(elapsed_seconds // 3600)))
             buckets[bucket_idx].append(e.risk_score or 0)
 

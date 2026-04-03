@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import {
@@ -79,7 +79,8 @@ function PasswordField({ value, onChange, placeholder, label, showMeter = false 
 export default function LoginPage() {
   const { login, bootstrap, setupStatus } = useAuth()
   const { dark, toggle } = useTheme()
-  const nav = useNavigate()
+  const nav      = useNavigate()
+  const location = useLocation()
 
   const [tab, setTab]     = useState('login')    // 'login' | 'setup'
   const [loading, setLoading] = useState(false)
@@ -102,6 +103,20 @@ export default function LoginPage() {
   useEffect(() => {
     if (setupStatus?.setup_required) setTab('setup')
   }, [setupStatus])
+
+  // Pre-fill bootstrap token from ?setup_token= query param (console quick-setup URL)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const token  = params.get('setup_token')
+    if (token) {
+      setSetupToken(token)
+      setTab('setup')
+      // Clean the URL without reloading the page (avoid token leaking in history)
+      const url = new URL(window.location.href)
+      url.searchParams.delete('setup_token')
+      window.history.replaceState({}, '', url.pathname + (url.search || ''))
+    }
+  }, [location.search])
 
   const handleLogin = async (e) => {
     e?.preventDefault()
