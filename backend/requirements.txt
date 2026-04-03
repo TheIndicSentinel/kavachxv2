@@ -21,3 +21,5 @@ cbor2>=5.4.6        # BASCG: AWS Nitro attestation document (COSE_Sign1) parsing
 # The governance engine detects their presence at runtime and enables OCR.
 pytesseract>=0.3.10
 Pillow>=10.0.0
+yt-dlp>=2023.1.28
+onnxruntime>=1.15.0
