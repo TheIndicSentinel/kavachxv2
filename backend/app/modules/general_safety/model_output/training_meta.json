@@ -1,0 +1,18 @@
+{
+  "epochs": 4,
+  "batch_size": 8,
+  "lr": 0.0003,
+  "val_split": 0.15,
+  "seed": 42,
+  "num_labels": 7,
+  "labels": [
+    "safe",
+    "self_harm",
+    "violence",
+    "hate_speech",
+    "prompt_injection",
+    "financial_crime",
+    "eu_ai_act_violation"
+  ],
+  "dataset_size": 1200
+}

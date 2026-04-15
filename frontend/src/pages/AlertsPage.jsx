@@ -3,7 +3,7 @@ import { Bell, AlertTriangle, XCircle, CheckCircle, Clock, X, Filter } from 'luc
 import { auditAPI } from '../utils/api'
 
 const ALERT_ICONS = { critical: <XCircle size={16} style={{ color: 'var(--red)', flexShrink: 0 }} />, warning: <AlertTriangle size={16} style={{ color: 'var(--amber)', flexShrink: 0 }} />, info: <CheckCircle size={16} style={{ color: 'var(--accent)', flexShrink: 0 }} /> }
-const ALERT_BADGE = { critical: 'badge-block', warning: 'badge-alert', info: 'badge-info' }
+const ALERT_BADGE = { critical: 'badge-critical', warning: 'badge-alert', info: 'badge-info' }
 
 const fmt = (d) => {
   const diff = Date.now() - d.getTime()
@@ -61,7 +61,25 @@ export default function AlertsPage() {
     load()
     const onSim = () => load(true)
     window.addEventListener('kavachx:simulation-complete', onSim)
-    return () => window.removeEventListener('kavachx:simulation-complete', onSim)
+
+    // Real-time: reload when a block or policy violation arrives over WebSocket
+    const apiBase = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? `${window.location.origin}/api/v1` : 'http://localhost:8005/api/v1')
+    const wsURL = `${apiBase.replace(/^http/, 'ws').replace('/api/v1', '')}/api/v1/ws/stream`
+    const ws = new WebSocket(wsURL)
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data)
+        if (msg.type === 'new_inference' &&
+            (msg.enforcement_decision === 'BLOCK' || msg.risk_score >= 0.60)) {
+          load(true)
+        }
+      } catch (e) {}
+    }
+
+    return () => {
+      window.removeEventListener('kavachx:simulation-complete', onSim)
+      ws.close()
+    }
   }, [])
 
   const markRead = (id) => setAlerts(a => a.map(al => al.id === id ? { ...al, read: true } : al))
@@ -93,7 +111,7 @@ export default function AlertsPage() {
           <div className="empty card"><Bell size={32} style={{ opacity: .2 }} /><div className="empty-title">No alerts</div></div>
         )}
         {filtered.map(alert => (
-          <div key={alert.id} className="card fade-up" style={{ borderLeft: `3px solid ${alert.type === 'critical' ? 'var(--red)' : alert.type === 'warning' ? 'var(--amber)' : 'var(--accent)'}`, opacity: alert.read ? .7 : 1 }}>
+          <div key={alert.id} className={`card fade-up${alert.type === 'critical' && !alert.read ? ' item-critical' : ''}`} style={{ borderLeft: `3px solid ${alert.type === 'critical' ? 'var(--red)' : alert.type === 'warning' ? 'var(--amber)' : 'var(--accent)'}`, opacity: alert.read ? .7 : 1 }}>
             <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
               {ALERT_ICONS[alert.type]}
               <div style={{ flex: 1 }}>

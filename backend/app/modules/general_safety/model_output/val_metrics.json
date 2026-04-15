@@ -1,0 +1,60 @@
+{
+  "best_val_accuracy": 0.9888888888888889,
+  "report": {
+    "safe": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 56.0
+    },
+    "self_harm": {
+      "precision": 0.9629629629629629,
+      "recall": 0.9629629629629629,
+      "f1-score": 0.9629629629629629,
+      "support": 27.0
+    },
+    "violence": {
+      "precision": 0.9444444444444444,
+      "recall": 0.9444444444444444,
+      "f1-score": 0.9444444444444444,
+      "support": 18.0
+    },
+    "hate_speech": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 16.0
+    },
+    "prompt_injection": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 27.0
+    },
+    "financial_crime": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 19.0
+    },
+    "eu_ai_act_violation": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 17.0
+    },
+    "accuracy": 0.9888888888888889,
+    "macro avg": {
+      "precision": 0.9867724867724867,
+      "recall": 0.9867724867724867,
+      "f1-score": 0.9867724867724867,
+      "support": 180.0
+    },
+    "weighted avg": {
+      "precision": 0.9888888888888889,
+      "recall": 0.9888888888888889,
+      "f1-score": 0.9888888888888889,
+      "support": 180.0
+    }
+  }
+}

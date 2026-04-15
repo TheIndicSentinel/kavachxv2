@@ -1,0 +1,647 @@
+[start.sh] Activating local virtual environment (venv)...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  KavachX AI Governance Platform
+  Environment : development
+  Port        : 8002
+  Workers     : 1
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[start.sh] No BASCG signing key found — generating ephemeral dev key...
+[start.sh] Starting uvicorn on 0.0.0.0:8002 ...
+INFO:     Will watch for changes in these directories: ['/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8002 (Press CTRL+C to quit)
+INFO:     Started reloader process [77908] using WatchFiles
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_type" in ModelCreate has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_sha256" in SubmitHashRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_card_url" in SubmitHashRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_card_url" in RegistryPatchRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_id" in IssueNAELRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_id_filter" in TimeWindowRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+INFO:     Started server process [77912]
+INFO:     Waiting for application startup.
+Sovereign ledger worker start warning: 'SovereignLedgerSyncService' object has no attribute 'start'
+NAIR sync worker start warning: 'NAIRSyncWorker' object has no attribute 'start'
+Distributed TEE worker start warning: 'DistributedTEEWorker' object has no attribute 'start'
+INFO:     Application startup complete.
+INFO:     127.0.0.1:50372 - "POST /api/v1/governance/simulate HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:50565 - "POST /api/v1/governance/simulate HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:50595 - "OPTIONS /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50598 - "OPTIONS /api/v1/dashboard/risk-trend?hours=24 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50600 - "OPTIONS /api/v1/dashboard/enforcement-breakdown HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50601 - "OPTIONS /api/v1/dashboard/compliance-summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50595 - "GET /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50600 - "GET /api/v1/dashboard/enforcement-breakdown HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50598 - "GET /api/v1/dashboard/risk-trend?hours=24 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50601 - "GET /api/v1/dashboard/compliance-summary HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 50670) - "WebSocket /api/v1/ws/stream" [accepted]
+INFO:     connection closed
+INFO:     127.0.0.1:50681 - "OPTIONS /api/v1/auth/demo-accounts HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 50682) - "WebSocket /api/v1/ws/stream" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:50684 - "OPTIONS /api/v1/auth/demo-accounts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50681 - "GET /api/v1/auth/demo-accounts HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 78, in call_next
+    message = await recv_stream.receive()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 98, in receive
+    return self.receive_nowait()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 91, in receive_nowait
+    raise EndOfStream
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 401, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/applications.py", line 292, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/applications.py", line 122, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 184, in __call__
+    raise exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 162, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 146, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 108, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/main.py", line 37, in dispatch
+    response = await call_next(request)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 84, in call_next
+    raise app_exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 79, in __call__
+    raise exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 20, in __call__
+    raise e
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 66, in app
+    response = await func(request)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 273, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 190, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/api/auth.py", line 58, in demo_accounts
+    if settings.EXPOSE_DEMO_PASSWORDS:
+NameError: name 'settings' is not defined
+INFO:     127.0.0.1:50684 - "GET /api/v1/auth/demo-accounts HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 78, in call_next
+    message = await recv_stream.receive()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 98, in receive
+    return self.receive_nowait()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 91, in receive_nowait
+    raise EndOfStream
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 401, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/applications.py", line 292, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/applications.py", line 122, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 184, in __call__
+    raise exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 162, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 146, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 108, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/main.py", line 37, in dispatch
+    response = await call_next(request)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 84, in call_next
+    raise app_exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 79, in __call__
+    raise exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 20, in __call__
+    raise e
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 66, in app
+    response = await func(request)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 273, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 190, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/api/auth.py", line 58, in demo_accounts
+    if settings.EXPOSE_DEMO_PASSWORDS:
+NameError: name 'settings' is not defined
+INFO:     127.0.0.1:50675 - "GET /api/v1/dashboard/risk-trend?hours=24 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50678 - "GET /api/v1/dashboard/enforcement-breakdown HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50680 - "GET /api/v1/dashboard/compliance-summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50672 - "GET /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50678 - "GET /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50693 - "GET /api/v1/dashboard/enforcement-breakdown HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50675 - "GET /api/v1/dashboard/compliance-summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50690 - "GET /api/v1/dashboard/risk-trend?hours=24 HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 50709) - "WebSocket /api/v1/ws/stream" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     127.0.0.1:50690 - "OPTIONS /api/v1/models/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50675 - "OPTIONS /api/v1/governance/inferences?limit=30 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50693 - "OPTIONS /api/v1/governance/inferences?limit=30 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50690 - "GET /api/v1/models/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50675 - "GET /api/v1/governance/inferences?limit=30 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50690 - "GET /api/v1/models/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50675 - "GET /api/v1/governance/inferences?limit=30 HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:50690 - "OPTIONS /api/v1/audit/logs?limit=20 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50693 - "OPTIONS /api/v1/audit/logs?limit=20 HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 50728) - "WebSocket /api/v1/ws/stream" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     ('127.0.0.1', 50730) - "WebSocket /api/v1/ws/stream" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:50690 - "GET /api/v1/audit/logs?limit=20 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50693 - "GET /api/v1/audit/logs?limit=20 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50675 - "GET /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50675 - "GET /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     ('127.0.0.1', 50740) - "WebSocket /api/v1/ws/stream" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 50742) - "WebSocket /api/v1/ws/stream" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:50675 - "GET /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:50746 - "GET /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50690 - "GET /api/v1/dashboard/enforcement-breakdown HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50693 - "GET /api/v1/dashboard/risk-trend?hours=24 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50744 - "GET /api/v1/dashboard/compliance-summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50675 - "GET /api/v1/dashboard/risk-trend?hours=24 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50746 - "GET /api/v1/dashboard/enforcement-breakdown HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50690 - "GET /api/v1/dashboard/compliance-summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50777 - "POST /api/v1/governance/simulate HTTP/1.1" 500 Internal Server Error
+WARNING:  WatchFiles detected changes in 'app/models/orm_models.py'. Reloading...
+INFO:     Shutting down
+INFO:     connection closed
+INFO:     Waiting for application shutdown.
+Sovereign Ledger worker stop warning: object NoneType can't be used in 'await' expression
+NAIR Sync worker stop warning: object NoneType can't be used in 'await' expression
+Distributed TEE worker stop warning: object NoneType can't be used in 'await' expression
+INFO:     Application shutdown complete.
+INFO:     Finished server process [77912]
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_type" in ModelCreate has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_sha256" in SubmitHashRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_card_url" in SubmitHashRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_card_url" in RegistryPatchRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_id" in IssueNAELRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_id_filter" in TimeWindowRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+INFO:     Started server process [78792]
+INFO:     Waiting for application startup.
+Sovereign ledger worker start warning: 'SovereignLedgerSyncService' object has no attribute 'start'
+NAIR sync worker start warning: 'NAIRSyncWorker' object has no attribute 'start'
+Distributed TEE worker start warning: 'DistributedTEEWorker' object has no attribute 'start'
+INFO:     Application startup complete.
+INFO:     ('127.0.0.1', 50812) - "WebSocket /api/v1/ws/stream" [accepted]
+INFO:     connection closed
+INFO:     ('127.0.0.1', 50818) - "WebSocket /api/v1/ws/stream" [accepted]
+INFO:     connection closed
+INFO:     ('127.0.0.1', 50825) - "WebSocket /api/v1/ws/stream" [accepted]
+INFO:     connection closed
+INFO:     ('127.0.0.1', 50830) - "WebSocket /api/v1/ws/stream" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:50815 - "GET /api/v1/models/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50817 - "GET /api/v1/governance/inferences?limit=30 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50823 - "GET /api/v1/dashboard/risk-trend?hours=24 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50827 - "GET /api/v1/dashboard/enforcement-breakdown HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50829 - "GET /api/v1/dashboard/compliance-summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50815 - "GET /api/v1/models/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50817 - "GET /api/v1/governance/inferences?limit=30 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50822 - "GET /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50827 - "GET /api/v1/dashboard/enforcement-breakdown HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50823 - "GET /api/v1/dashboard/risk-trend?hours=24 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50829 - "GET /api/v1/dashboard/compliance-summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50815 - "GET /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50909 - "POST /api/v1/governance/simulate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50916 - "GET /api/v1/dashboard/enforcement-breakdown HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50917 - "GET /api/v1/dashboard/compliance-summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50914 - "GET /api/v1/dashboard/risk-trend?hours=24 HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 98, in receive
+    return self.receive_nowait()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 93, in receive_nowait
+    raise WouldBlock
+anyio.WouldBlock
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 78, in call_next
+    message = await recv_stream.receive()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 118, in receive
+    raise EndOfStream
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 401, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/applications.py", line 292, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/applications.py", line 122, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 184, in __call__
+    raise exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 162, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 146, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 108, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/main.py", line 37, in dispatch
+    response = await call_next(request)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 84, in call_next
+    raise app_exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 79, in __call__
+    raise exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 20, in __call__
+    raise e
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 66, in app
+    response = await func(request)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 273, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 190, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/api/dashboard.py", line 62, in get_risk_trend
+    if ts and ts >= since:
+TypeError: can't compare offset-naive and offset-aware datetimes
+INFO:     127.0.0.1:50911 - "GET /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50985 - "GET /api/v1/dashboard/enforcement-breakdown HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50986 - "GET /api/v1/dashboard/compliance-summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50982 - "GET /api/v1/dashboard/risk-trend?hours=24 HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 98, in receive
+    return self.receive_nowait()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 93, in receive_nowait
+    raise WouldBlock
+anyio.WouldBlock
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 78, in call_next
+    message = await recv_stream.receive()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 118, in receive
+    raise EndOfStream
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 401, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/applications.py", line 292, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/applications.py", line 122, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 184, in __call__
+    raise exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 162, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 146, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 108, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/main.py", line 37, in dispatch
+    response = await call_next(request)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 84, in call_next
+    raise app_exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 79, in __call__
+    raise exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 20, in __call__
+    raise e
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 66, in app
+    response = await func(request)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 273, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 190, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/api/dashboard.py", line 62, in get_risk_trend
+    if ts and ts >= since:
+TypeError: can't compare offset-naive and offset-aware datetimes
+INFO:     127.0.0.1:50980 - "GET /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 51097) - "WebSocket /api/v1/ws/stream" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     127.0.0.1:51093 - "GET /api/v1/models/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51095 - "GET /api/v1/governance/inferences?limit=30 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51099 - "GET /api/v1/models/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51093 - "GET /api/v1/governance/inferences?limit=30 HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 51109) - "WebSocket /api/v1/ws/stream" [accepted]
+INFO:     connection closed
+INFO:     ('127.0.0.1', 51111) - "WebSocket /api/v1/ws/stream" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     127.0.0.1:51095 - "GET /api/v1/dashboard/enforcement-breakdown HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51113 - "GET /api/v1/dashboard/compliance-summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51099 - "GET /api/v1/dashboard/risk-trend?hours=24 HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 98, in receive
+    return self.receive_nowait()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 93, in receive_nowait
+    raise WouldBlock
+anyio.WouldBlock
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 78, in call_next
+    message = await recv_stream.receive()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 118, in receive
+    raise EndOfStream
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 401, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/applications.py", line 292, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/applications.py", line 122, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 184, in __call__
+    raise exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 162, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 146, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 108, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/main.py", line 37, in dispatch
+    response = await call_next(request)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 84, in call_next
+    raise app_exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 79, in __call__
+    raise exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 20, in __call__
+    raise e
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 66, in app
+    response = await func(request)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 273, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 190, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/api/dashboard.py", line 62, in get_risk_trend
+    if ts and ts >= since:
+TypeError: can't compare offset-naive and offset-aware datetimes
+INFO:     127.0.0.1:51093 - "GET /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51117 - "GET /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51115 - "GET /api/v1/dashboard/enforcement-breakdown HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51095 - "GET /api/v1/dashboard/compliance-summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51113 - "GET /api/v1/dashboard/risk-trend?hours=24 HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 98, in receive
+    return self.receive_nowait()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 93, in receive_nowait
+    raise WouldBlock
+anyio.WouldBlock
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 78, in call_next
+    message = await recv_stream.receive()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 118, in receive
+    raise EndOfStream
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 401, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/applications.py", line 292, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/applications.py", line 122, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 184, in __call__
+    raise exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 162, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 146, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 108, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/main.py", line 37, in dispatch
+    response = await call_next(request)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 84, in call_next
+    raise app_exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 79, in __call__
+    raise exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 20, in __call__
+    raise e
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 66, in app
+    response = await func(request)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 273, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 190, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/api/dashboard.py", line 62, in get_risk_trend
+    if ts and ts >= since:
+TypeError: can't compare offset-naive and offset-aware datetimes
+INFO:     127.0.0.1:51251 - "GET /api/v1/dashboard/enforcement-breakdown HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51252 - "GET /api/v1/dashboard/compliance-summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51248 - "GET /api/v1/dashboard/risk-trend?hours=24 HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 98, in receive
+    return self.receive_nowait()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 93, in receive_nowait
+    raise WouldBlock
+anyio.WouldBlock
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 78, in call_next
+    message = await recv_stream.receive()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/anyio/streams/memory.py", line 118, in receive
+    raise EndOfStream
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 401, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/applications.py", line 292, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/applications.py", line 122, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 184, in __call__
+    raise exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 162, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 146, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 108, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/main.py", line 37, in dispatch
+    response = await call_next(request)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 84, in call_next
+    raise app_exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 79, in __call__
+    raise exc
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 20, in __call__
+    raise e
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 66, in app
+    response = await func(request)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 273, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 190, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/api/dashboard.py", line 62, in get_risk_trend
+    if ts and ts >= since:
+TypeError: can't compare offset-naive and offset-aware datetimes
+INFO:     127.0.0.1:51246 - "GET /api/v1/dashboard/stats HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     connection closed
+INFO:     Waiting for application shutdown.
+Sovereign Ledger worker stop warning: object NoneType can't be used in 'await' expression
+NAIR Sync worker stop warning: object NoneType can't be used in 'await' expression
+Distributed TEE worker stop warning: object NoneType can't be used in 'await' expression
+INFO:     Application shutdown complete.
+INFO:     Finished server process [78792]
+INFO:     Stopping reloader process [77908]

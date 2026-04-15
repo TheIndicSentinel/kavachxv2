@@ -1,24 +1,67 @@
 /**
- * KavachX Browser Extension — Precision Interceptor (v7)
+ * KavachX Browser Extension — Precision Interceptor (v8)
  *
- * Fix v6 → v7: Re-dispatch loop resolved.
- * - After PASS/ALERT, we find and CLICK the real Send button instead of
- *   simulating a keyboard event (which gets caught by the interceptor again).
- * - A `bypassing` flag at the very top of the handler prevents any
- *   re-entry during the release window.
- * - Only `enforcement_decision === "BLOCK"` stops the prompt.
+ * v7 → v8:
+ * - postMessage bridge for interceptor.js (MAIN world) — routes LLM network
+ *   requests through the background service worker and returns the decision.
+ * - WebSocket AI-stream notification (passive — shows a subtle indicator).
+ * - Soft WARN banner for offline / network-intercept non-blocking alerts.
+ * - show_block handler wired to showBanner() for network-intercepted BLOCKs.
  */
 
 (function () {
   'use strict';
 
-  if (window.__kavachxInjectedV7) return;
-  window.__kavachxInjectedV7 = true;
+  if (window.__kavachxInjectedV8) return;
+  window.__kavachxInjectedV8 = true;
 
-  console.log('🛡️ Kavach AI Shield v7: Precision Interceptor Active');
+  console.log('🛡️ Kavach AI Shield v8: Precision Interceptor Active');
 
   let evaluating = false; // True while waiting for backend response
   let bypassing  = false; // True during the release window (prevents re-interception)
+  let contextDead = false; // True after the extension context is invalidated
+
+  // ── Context validity guard ─────────────────────────────────────────────────
+  // After an extension reload/update, chrome.runtime.id becomes undefined and
+  // any call to chrome.runtime.sendMessage throws "Extension context invalidated".
+  // We detect this and tear down all listeners so the dead script stops interfering.
+
+  function isContextValid() {
+    try {
+      return !!(chrome?.runtime?.id);
+    } catch {
+      return false;
+    }
+  }
+
+  // Refs held for teardown
+  const _domListeners = [];
+  const _winListeners = [];
+
+  function teardown() {
+    if (contextDead) return;
+    contextDead = true;
+    console.log('🛡️ [Kavach] Extension context invalidated — removing listeners.');
+    _domListeners.forEach(([type, fn]) => document.removeEventListener(type, fn, true));
+    _winListeners.forEach(fn => window.removeEventListener('message', fn));
+    // Reset the guard so a freshly injected v8 can re-attach
+    window.__kavachxInjectedV8 = false;
+  }
+
+  // Safe wrapper: calls fn() only if context is still valid; tears down if not
+  function safeRuntime(fn) {
+    if (!isContextValid()) { teardown(); return; }
+    try {
+      fn();
+    } catch (err) {
+      if (err?.message?.includes('Extension context invalidated') ||
+          err?.message?.includes('Cannot read properties of undefined')) {
+        teardown();
+      } else {
+        console.warn('🛡️ [Kavach] Runtime error:', err.message);
+      }
+    }
+  }
 
   // ─── Shadow-DOM Aware Prompt Scraper ──────────────────────────────────────
   function findPrompt() {
@@ -154,33 +197,140 @@
 
     console.log(`🛡️ [Kavach] Intercepted: "${result.text.substring(0, 45)}..."`);
 
-    chrome.runtime.sendMessage(
-      { action: 'evaluate_prompt', prompt: result.text, domain: window.location.hostname },
-      (response) => {
-        evaluating = false;
+    safeRuntime(() => {
+      chrome.runtime.sendMessage(
+        { action: 'evaluate_prompt', prompt: result.text, domain: window.location.hostname },
+        (response) => {
+          evaluating = false;
 
-        if (chrome.runtime.lastError || !response) {
-          console.warn('🛡️ [Kavach] Engine unreachable — blocking for safety');
-          showBanner('Governance Engine Offline — Prompt Blocked for Safety');
-          return;
+          // Suppress the "message channel closed" benign error Chrome emits on SW restart
+          if (chrome.runtime.lastError) {
+            const msg = chrome.runtime.lastError.message || '';
+            if (msg.includes('context invalidated') || msg.includes('Extension context')) {
+              teardown(); return;
+            }
+            // Engine offline — apply graceful fallback
+            releasePrompt();
+            return;
+          }
+
+          if (!response) { releasePrompt(); return; }
+
+          const decision = (response.decision || 'PASS').toUpperCase();
+          console.log(`🛡️ [Kavach] Decision: ${decision}`);
+
+          if (decision === 'BLOCK') {
+            showBanner(response.reason || 'Blocked by KavachX Governance Policy');
+          } else if (decision === 'WARN') {
+            showWarn(response.reason || 'AI request allowed with a governance warning.');
+            releasePrompt();
+          } else {
+            // PASS / ALERT → release silently; audit log written to dashboard
+            releasePrompt();
+          }
         }
-
-        const decision = (response.decision || 'PASS').toUpperCase();
-        console.log(`🛡️ [Kavach] Decision: ${decision}`);
-
-        if (decision === 'BLOCK') {
-          showBanner(response.reason || 'Blocked by KavachX Governance Policy');
-        } else {
-          // PASS or ALERT → release silently, audit log written to dashboard
-          releasePrompt();
-        }
-      }
-    );
+      );
+    });
+    if (contextDead) { evaluating = false; releasePrompt(); }
   }
 
-  // Capture phase on all relevant events
+  // Register capture-phase listeners and keep refs for teardown
   ['keydown', 'click', 'mousedown'].forEach(type => {
+    _domListeners.push([type, handler]);
     document.addEventListener(type, handler, true);
   });
+
+  // ─── Soft Warning Banner (WARN decision / offline) ────────────────────────
+  function showWarn(msg) {
+    document.getElementById('kavachx-warn-alert')?.remove();
+    const b = document.createElement('div');
+    b.id = 'kavachx-warn-alert';
+    b.style.cssText = [
+      'position:fixed', 'top:30px', 'left:50%', 'transform:translateX(-50%)',
+      'background:#1c1a00', 'color:#fbbf24', 'padding:14px 22px',
+      'border-radius:10px', 'z-index:2147483647', 'font-family:system-ui,sans-serif',
+      'box-shadow:0 8px 32px rgba(0,0,0,0.7)', 'border:1.5px solid #f59e0b',
+      'text-align:center', 'max-width:420px', 'line-height:1.5', 'font-size:13px',
+    ].join(';');
+    b.innerHTML = `<strong>⚠️ KAVACH WARNING</strong>
+      <div style="margin-top:6px;opacity:0.9;">${msg}</div>`;
+    document.body.appendChild(b);
+    setTimeout(() => {
+      b.style.transition = 'opacity 0.4s';
+      b.style.opacity = '0';
+      setTimeout(() => b.remove(), 400);
+    }, 5000);
+  }
+
+  // ─── postMessage Bridge (MAIN world ↔ ISOLATED world ↔ background) ───────
+  // interceptor.js (MAIN world) cannot call chrome.runtime.sendMessage directly.
+  // It posts to window; we receive here and proxy to the background service worker,
+  // then post the response back so interceptor.js can resolve its Promise.
+
+  const _bridgeListener = (evt) => {
+    if (evt.source !== window) return;
+    if (contextDead) return;
+    const msg = evt.data;
+    if (!msg || typeof msg !== 'object') return;
+
+    // ── Route LLM network-intercept evaluation ──────────────────────────────
+    if (msg.kavachx_type === 'evaluate_request' && msg.prompt) {
+      const msgId = msg.kavachx_msg_id;
+      safeRuntime(() => {
+      chrome.runtime.sendMessage(
+        {
+          action: 'evaluate_prompt',
+          prompt: msg.prompt,
+          domain: msg.domain || window.location.hostname,
+          source: msg.source || 'network_intercept',
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            const errMsg = chrome.runtime.lastError.message || '';
+            if (errMsg.includes('context invalidated') || errMsg.includes('Extension context')) {
+              teardown(); return;
+            }
+            // Engine unreachable — fail open for network intercepts
+            window.postMessage({
+              kavachx_type:   'evaluate_response',
+              kavachx_msg_id: msgId,
+              decision:       'WARN',
+              reason:         'KavachX Engine unreachable — request allowed with caution.',
+            }, '*');
+            showWarn('KavachX Engine unreachable — AI request allowed with caution.');
+            return;
+          }
+          if (!response) {
+            window.postMessage({ kavachx_type: 'evaluate_response', kavachx_msg_id: msgId, decision: 'PASS' }, '*');
+            return;
+          }
+          window.postMessage({
+            kavachx_type:   'evaluate_response',
+            kavachx_msg_id: msgId,
+            decision:       response.decision,
+            reason:         response.reason,
+          }, '*');
+          if ((response.decision || '').toUpperCase() === 'WARN') {
+            showWarn(response.reason || 'AI request allowed with a governance warning.');
+          }
+        }
+      );
+      }); // end safeRuntime
+    }
+
+    // ── Display block banner triggered by network-intercepted BLOCK ──────────
+    if (msg.kavachx_type === 'show_block') {
+      showBanner(msg.reason || 'Blocked by KavachX Governance Policy');
+    }
+
+    // ── Log passive WebSocket AI-stream detection ────────────────────────────
+    if (msg.kavachx_type === 'ws_ai_stream') {
+      console.log(`🛡️ [Kavach] AI streaming response detected on ${msg.domain}`);
+    }
+  };
+
+  // Register and track for teardown
+  _winListeners.push(_bridgeListener);
+  window.addEventListener('message', _bridgeListener);
 
 })();

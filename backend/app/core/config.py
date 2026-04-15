@@ -147,6 +147,29 @@ class Settings(BaseSettings):
     # When True, vote signatures are verified against trusted Ed25519 keys
     CONSENSUS_VERIFY_VOTE_SIGNATURES: bool = True
 
+    # ── DPDP AI Moderator — partner / SDK integration ────────────────────────
+    # Comma-separated list of valid API keys for external partner access.
+    # Each key grants access to /dpdp-moderator/* endpoints.
+    # Generate per partner: python -c "import secrets; print(secrets.token_urlsafe(32))"
+    # Format: "key1,key2,key3"  — whitespace around commas is stripped.
+    # Empty string = API key auth disabled (JWT auth still applies to all endpoints).
+    DPDP_API_KEYS: str = ""
+    # Per-key rate limit: max requests per minute (sliding window).
+    # Partners exceeding this receive HTTP 429. Set 0 to disable.
+    DPDP_RATE_LIMIT_RPM: int = 120
+    # Max items accepted in a single batch moderation request.
+    DPDP_BATCH_MAX_SIZE: int = 50
+    # When True, every moderation decision is appended to decisions.jsonl
+    # alongside feedback.jsonl in model_output/.
+    DPDP_AUDIT_LOG_ENABLED: bool = True
+    # Timeout (seconds) for delivering an async moderation result to a webhook URL.
+    DPDP_WEBHOOK_TIMEOUT_SECONDS: int = 30
+
+    # ── DPDP AI Moderator — model paths ──────────────────────────────────────
+    # Override the default model_output directory (absolute path or relative to cwd).
+    # Leave empty to use the default path alongside inference.py.
+    DPDP_MODEL_DIR: str = ""
+
     # ── BASCG T3-D: Legal Bundle Export ──────────────────────────────────────
     # Enable the legal bundle export API
     LEGAL_EXPORT_ENABLED: bool = True
@@ -166,6 +189,12 @@ class Settings(BaseSettings):
     NAIR_PULL_PAGE_SIZE: int = 100
     # When True, verify Ed25519 signature on every pulled entry
     NAIR_PULL_VERIFY_SIGNATURES: bool = True
+
+    def get_dpdp_api_keys(self) -> set[str]:
+        """Return the set of valid DPDP partner API keys."""
+        if not self.DPDP_API_KEYS:
+            return set()
+        return {k.strip() for k in self.DPDP_API_KEYS.split(",") if k.strip()}
 
     def get_cors_origins(self) -> List[str]:
         """

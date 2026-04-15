@@ -1,0 +1,101 @@
+INFO:     Will watch for changes in these directories: ['/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend']
+INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [56926] using WatchFiles
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_type" in ModelCreate has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_sha256" in SubmitHashRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_card_url" in SubmitHashRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_card_url" in RegistryPatchRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_id" in IssueNAELRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_id_filter" in TimeWindowRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+INFO:     Started server process [56931]
+INFO:     Waiting for application startup.
+ERROR:    Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 677, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 175, in __aenter__
+    return await self.gen.__anext__()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/main.py", line 51, in lifespan
+    run_production_checks()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/core/startup_checks.py", line 150, in run_production_checks
+    raise RuntimeError("\n".join(lines))
+RuntimeError: 
+======================================================================
+  BASCG PRODUCTION STARTUP FAILURE
+  The following security checks failed:
+======================================================================
+  [1] BASCG_SIGNING_KEY_SEED_B64 decodes to 41 bytes — expected 32.
+  [1]   Fix: re-run `python scripts/generate_dev_keys.py` to generate a valid seed.
+======================================================================
+  Set the missing environment variables and restart.
+======================================================================
+
+
+ERROR:    Application startup failed. Exiting.
+WARNING:  WatchFiles detected changes in 'app/db/database.py'. Reloading...
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_type" in ModelCreate has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_sha256" in SubmitHashRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_card_url" in SubmitHashRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_card_url" in RegistryPatchRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_id" in IssueNAELRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_id_filter" in TimeWindowRequest has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+INFO:     Started server process [57240]
+INFO:     Waiting for application startup.
+ERROR:    Traceback (most recent call last):
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 677, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 175, in __aenter__
+    return await self.gen.__anext__()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/main.py", line 51, in lifespan
+    run_production_checks()
+  File "/Users/bytenomad./Documents/Projects/kavachx-v3.6/backend/app/core/startup_checks.py", line 150, in run_production_checks
+    raise RuntimeError("\n".join(lines))
+RuntimeError: 
+======================================================================
+  BASCG PRODUCTION STARTUP FAILURE
+  The following security checks failed:
+======================================================================
+  [1] BASCG_SIGNING_KEY_SEED_B64 decodes to 41 bytes — expected 32.
+  [1]   Fix: re-run `python scripts/generate_dev_keys.py` to generate a valid seed.
+======================================================================
+  Set the missing environment variables and restart.
+======================================================================
+
+
+ERROR:    Application startup failed. Exiting.
+INFO:     Stopping reloader process [56926]

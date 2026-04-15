@@ -6,10 +6,11 @@ from enum import Enum
 
 
 class EnforcementDecision(str, Enum):
-    PASS = "PASS"
-    ALERT = "ALERT"
-    HUMAN_REVIEW = "HUMAN_REVIEW"
-    BLOCK = "BLOCK"
+    PASS             = "PASS"
+    ALLOW_WITH_AUTH  = "ALLOW_WITH_AUTH"   # own-data request; requires authentication
+    ALERT            = "ALERT"
+    HUMAN_REVIEW     = "HUMAN_REVIEW"
+    BLOCK            = "BLOCK"
 
 
 class RiskLevel(str, Enum):
@@ -72,6 +73,7 @@ class GovernanceResult(BaseModel):
     explanation: ExplanationOutput
     timestamp: datetime
     processing_time_ms: float
+    ownership_context: Optional[Dict[str, Any]] = None  # set by ownership_detector
 
     @field_serializer('timestamp')
     def serialize_timestamp(self, dt: datetime) -> str:

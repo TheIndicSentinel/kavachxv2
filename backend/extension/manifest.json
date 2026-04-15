@@ -1,20 +1,28 @@
 {
   "manifest_version": 3,
   "name": "Kavach AI Shield",
-  "version": "2.0",
-  "description": "Enterprise AI Governance — Intercept, Evaluate & Enforce policy on ChatGPT, Claude, Gemini, Copilot and more.",
+  "version": "3.0",
+  "description": "Enterprise AI Governance — Intercept, Evaluate & Enforce policy on any AI tool via network-level detection.",
   "permissions": [
     "storage",
     "notifications",
     "scripting",
-    "activeTab"
+    "activeTab",
+    "tabs",
+    "alarms"
   ],
   "host_permissions": ["<all_urls>"],
   "background": {
-    "service_worker": "background.js",
-    "type": "module"
+    "service_worker": "background.js"
   },
   "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["interceptor.js"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": false
+    },
     {
       "matches": ["<all_urls>"],
       "js": ["content.js"],

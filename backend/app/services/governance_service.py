@@ -19,6 +19,23 @@ from app.modules.explainability import ExplainabilityEngine
 from app.modules.risk_scorer import RiskScorer
 from app.modules.safety_scanner import SafetyScanner
 from app.modules.pii_scanner import pii_scanner as _pii_scanner
+from app.modules.ownership_detector import detect as _detect_ownership, Ownership
+
+# DPDP AI Moderator — lazy import so startup is not blocked if ML libs are missing
+try:
+    from app.modules.dpdp_moderator.pipeline import moderate_async as _dpdp_moderate
+    _DPDP_MODERATOR_AVAILABLE = True
+except Exception as _dpdp_import_err:  # noqa: BLE001
+    _DPDP_MODERATOR_AVAILABLE = False
+    _gsvc_log = __import__("logging").getLogger("kavachx.governance")
+    _gsvc_log.warning("DPDP AI Moderator unavailable (install dpdp_moderator deps): %s", _dpdp_import_err)
+
+# General Safety Moderator — lazy import (Phase 2)
+try:
+    from app.modules.general_safety.inference import moderate as _general_safety_moderate
+    _GENERAL_SAFETY_AVAILABLE = True
+except Exception as _gs_import_err:  # noqa: BLE001
+    _GENERAL_SAFETY_AVAILABLE = False
 
 import logging as _log
 _gsvc_log = _log.getLogger("kavachx.governance")
@@ -318,7 +335,8 @@ class GovernanceService:
         pii_result = _pii_scanner.scan(original_text)
 
         if pii_result.pii_detected or pii_result.should_alert:
-            request.input_data["pii_detected"]      = pii_result.pii_detected
+            request.input_data["pii_detected"]         = pii_result.pii_detected
+            request.input_data["pii_scanner_should_block"] = pii_result.should_block
             request.input_data["pii_types"]         = pii_result.pii_types
             request.input_data["personal_data_used"] = pii_result.personal_data_used
             request.input_data["pii_risk_boost"]    = pii_result.risk_boost
@@ -422,10 +440,105 @@ class GovernanceService:
                 request.context["equity_analysis"] = True
 
         # ── NO triggers for normal/benign prompts ──
-        # "Analyze the economic disparity gap" → triggers 3b (ALERT) only  
+        # "Analyze the economic disparity gap" → triggers 3b (ALERT) only
         # "Run a performance check" → NO trigger (normal query = PASS)
         # "Help me write code" → NO trigger (normal query = PASS)
         # "What is machine learning?" → NO trigger (normal query = PASS)
+
+        # ── CATEGORY 4: Infrastructure Credential Shield ──────────────────────
+        # Hard BLOCK: any prompt requesting connection strings, API keys, passwords,
+        # or internal infrastructure details — regardless of stated role/context.
+        # Identity/role claims ("I'm a researcher", "I have admin access") are NOT
+        # accepted as bypass — authentication happens at the system boundary only.
+        _CREDENTIAL_TERMS = re.compile(
+            r"\b(connection\s+string|database\s+credentials?|db\s+password|"
+            r"api\s+key|api\s+secret|access\s+key|secret\s+key|private\s+key|"
+            r"jwt\s+secret|signing\s+key|\.env\s+file|raw\s+\.env|env\s+variable|"
+            r"environment\s+variable[s]?\s*(for\s+prod|of\s+prod|from\s+prod)?|"
+            r"production\s+(password|secret|credential|env)|master\s+password|"
+            r"sftp\s+credentials?|encryption\s+key|internal\s+ip\s+address|"
+            r"server\s+config|ssh\s+(key|password)|admin\s+password|"
+            r"plaintext\s+password|password\s+hash|bearer\s+token|"
+            r"kubeconfig|kube\s*config|kubernetes\s+(config|credentials?|secret)|"
+            r"k8s\s+(config|credentials?|secret)|cluster\s+(credentials?|config|token)|"
+            r"infrastructure\s+secrets?|service\s+account\s+(key|token)|"
+            r"vault\s+(token|secrets?)|iam\s+(key|credentials?|role\s+credentials?))\b",
+            re.IGNORECASE,
+        )
+        _ROLE_CLAIM_BYPASS = re.compile(
+            r"\b(i\s+(am|'m|have|work\s+as)\s+(a|an|the)\s+)?"
+            r"(security\s+researcher|penetration\s+tester|pen\s+tester|"
+            r"ethical\s+hacker|white.hat|red\s+team|authorized\s+researcher|"
+            r"sysadmin|system\s+administrator|cto|ciso|dpo|data\s+protection\s+officer|"
+            r"lead\s+developer|lead\s+devops|devops\s+engineer|lead\s+engineer|"
+            r"platform\s+engineer|infrastructure\s+engineer|site\s+reliability|"
+            r"security\s+auditor|it\s+team|compliance\s+officer)\b",
+            re.IGNORECASE,
+        )
+        if _CREDENTIAL_TERMS.search(original_text):
+            request.input_data["credential_exposure_detected"] = True
+            request.input_data["general_safety_block"] = True
+            request.context["credential_request_detected"] = True
+            if _ROLE_CLAIM_BYPASS.search(original_text):
+                request.context["role_claim_bypass_attempt"] = True
+
+        # ── CATEGORY 5: Cross-Border Transfer to Restricted Jurisdiction ──────
+        # DPDP Act §16: personal data transfer permitted only to countries notified
+        # by Central Government. "Restricted country", "blacklisted", "non-notified
+        # jurisdiction", "no adequacy agreement" + "transfer/move/migrate data" = BLOCK.
+        _CROSSBORDER_ACTION = re.compile(
+            r"\b(transfer|move|migrate|send|export|ship|offshore|replicate|sync)\b"
+            r".{0,40}(data|records?|database|users?|customers?|citizens?|personal\s+information)\b",
+            re.IGNORECASE,
+        )
+        _RESTRICTED_JURISDICTION = re.compile(
+            r"\b(restricted\s+country|blacklisted\s+(country|jurisdiction)|"
+            r"non.notified\s+(country|jurisdiction)|no\s+adequacy\s+agreement|"
+            r"not\s+(on\s+the\s+)?(dpdp\s+)?(approved|notified)\s+(transfer\s+)?list|"
+            r"high.risk\s+(country|jurisdiction)|data\s+transfer\s+restriction|"
+            r"tax.haven|data\s+laws?\s+(are\s+)?(less\s+stringent|lax|relaxed|weaker|looser)|"
+            r"(less\s+stringent|lax|relaxed|weaker|fewer)\s+data\s+(laws?|regulations?|rules?)|"
+            r"jurisdiction\s+where\s+(data|privacy)\s+(law|regulation|protection)|"
+            r"where\s+(data|privacy)\s+(laws?|regulations?)\s+(are\s+)?(less|weaker|lax|minimal)|"
+            r"offshore.*cheaper.*data|avoid.*data.*regulation|"
+            r"(cold.storage|bucket|server)\s+in\s+a\s+tax.haven)\b",
+            re.IGNORECASE,
+        )
+        if _CROSSBORDER_ACTION.search(original_text) and _RESTRICTED_JURISDICTION.search(original_text):
+            request.input_data["cross_border_restricted_country"] = True
+            request.input_data["dpdp_violation"] = True
+            request.input_data.setdefault("personal_data_used", True)
+            request.input_data.setdefault("consent_verified", False)
+            request.context["dpdp_s16_violation"] = True
+
+        # ── CATEGORY 6: Shadow AI Detection ──────────────────────────────────
+        # Detects employees using personal/unauthorized AI accounts to process
+        # company or customer data — a DPDP governance violation with no audit trail.
+        #
+        # Three signal types:
+        #   A. Explicit: user states they are using a personal/external AI tool
+        #   B. Confidentiality markers: document is marked CONFIDENTIAL/INTERNAL + company data
+        #   C. Context already flagged shadow_ai_detected (browser extension traffic)
+        _SHADOW_AI_TOOL = re.compile(
+            r"\b(using\s+(my\s+)?(personal|free|private|own)?\s*(chatgpt|claude|gemini|"
+            r"gpt.4?|bard|copilot|llm|ai\s+tool|ai\s+chatbot)\s*(account|subscription|tier)?|"
+            r"pasting\s+(this\s+)?(into|to)\s+(chatgpt|claude|gemini|external\s+ai)|"
+            r"sent\s+(this\s+)?(to\s+)?(chatgpt|claude|gemini|an?\s+external\s+ai)|"
+            r"personal\s+ai\s+(account|subscription)|free\s+(ai|chatgpt)\s+tier)\b",
+            re.IGNORECASE,
+        )
+        _CONFIDENTIAL_MARKER = re.compile(
+            r"\b(confidential|internal\s+use\s+only|do\s+not\s+share|nda|"
+            r"proprietary|trade\s+secret|restricted\s+document|classified)\b",
+            re.IGNORECASE,
+        )
+        if _SHADOW_AI_TOOL.search(original_text):
+            request.input_data["shadow_ai_company_data"] = True
+            request.context["shadow_ai_explicit"] = True
+        elif _CONFIDENTIAL_MARKER.search(original_text) and request.context.get("shadow_ai_detected"):
+            # Extension traffic + confidential document = shadow AI with company data
+            request.input_data["shadow_ai_company_data"] = True
+            request.context["shadow_ai_confidential_doc"] = True
 
         # ── BASCG P3 Synthetic Media Shield ──────────────────────────────────
         # If the inference carries base64-encoded media bytes, scan for deepfakes
@@ -470,13 +583,146 @@ class GovernanceService:
                     "Synthetic media scan failed (non-fatal): %s", _sm_exc
                 )
 
-        # Safety scan — always run for toxicity/injection detection
+        # Safety scan — always run for toxicity/injection/privacy/EU AI Act detection
         if not request.input_data.get("toxicity_score") and not request.input_data.get("prompt_injection_score"):
             safety_results = self.safety_scanner.analyze_exchange(input_text, output_text)
             request.input_data.update(safety_results)
             if "injection_score" in request.input_data and "prompt_injection_score" not in request.input_data:
                 request.input_data["prompt_injection_score"] = request.input_data["injection_score"]
             inference_data["input_data"] = request.input_data
+
+        # ── DPDP AI Moderator (3-layer: regex + DistilBERT+LoRA + MiniLM) ────
+        # Runs asynchronously in thread-pool so the event loop stays unblocked.
+        # Results are injected into input_data so policy_engine can act on them.
+        if _DPDP_MODERATOR_AVAILABLE:
+            try:
+                _dpdp_result = await _dpdp_moderate(original_text or input_text)
+                request.input_data["dpdp_ai_verdict"]         = _dpdp_result.verdict.value   # ALLOW/REVIEW/BLOCK
+                request.input_data["dpdp_ai_risk_score"]      = round(_dpdp_result.risk_score, 4)
+                request.input_data["dpdp_ai_top_label"]       = _dpdp_result.top_label
+                request.input_data["dpdp_ai_top_prob"]        = round(_dpdp_result.top_label_prob, 4)
+                request.input_data["dpdp_ai_reasons"]         = _dpdp_result.reasons
+                request.input_data["dpdp_ai_layer_decisions"] = _dpdp_result.layer_decisions
+                # Propagate high-confidence unsafe labels into existing gates so
+                # existing policies (DPDP consent gate, PII harvesting) also fire.
+                if _dpdp_result.verdict.value == "BLOCK":
+                    _label = _dpdp_result.top_label
+                    if _label in ("personal_data", "health_data", "financial_data"):
+                        request.input_data.setdefault("pii_harvesting_score", 0.92)
+                        request.input_data.setdefault("personal_data_used", True)
+                        request.input_data.setdefault("consent_verified", False)
+                    elif _label == "surveillance":
+                        request.input_data.setdefault("eu_ai_act_score", 0.85)
+                    elif _label == "profiling":
+                        request.input_data.setdefault("pii_harvesting_score", 0.80)
+                        request.input_data.setdefault("personal_data_used", True)
+                        request.input_data.setdefault("consent_verified", False)
+                    elif _label == "criminal_misuse":
+                        # Explicit fraud/crime — escalate to financial crime gate
+                        request.input_data.setdefault("financial_crime_score", 0.90)
+                    elif _label == "compliance_abuse":
+                        # DPDP policy violation — trigger consent and data-use gates
+                        request.input_data.setdefault("pii_harvesting_score", 0.75)
+                        request.input_data.setdefault("personal_data_used", True)
+                        request.input_data.setdefault("consent_verified", False)
+                # Soft enrichment for REVIEW verdicts
+                elif _dpdp_result.verdict.value == "REVIEW":
+                    request.input_data.setdefault("pii_harvesting_score",
+                        max(request.input_data.get("pii_harvesting_score", 0), 0.55))
+            except Exception as _dpdp_exc:
+                import traceback as _tb
+                _gsvc_log.error(
+                    "DPDP AI Moderator inference failed — prompt will not be AI-screened.\n%s",
+                    _tb.format_exc()
+                )
+
+        # ── General Safety Moderator (Phase 2) ───────────────────────────────
+        # 2-layer pipeline: DistilBERT+LoRA classifier (7 classes) + MiniLM
+        # embedding similarity gate. Propagates per-class scores into
+        # request.input_data so all existing policy engine conditions fire
+        # (self_harm_score, violence_score, toxicity_score, etc.) without any
+        # new conditions needed.
+        _gs_input_text = original_text or input_text
+        if _GENERAL_SAFETY_AVAILABLE and _gs_input_text:
+            try:
+                _gs_result = await _general_safety_moderate(_gs_input_text)
+                # Propagate per-category scores — only non-trivial signals
+                for _score_key, _score_val in _gs_result.score_map.items():
+                    if _score_val > 0.0:
+                        # Use max() so a higher DPDP score is never downgraded
+                        request.input_data[_score_key] = max(
+                            request.input_data.get(_score_key, 0.0),
+                            _score_val,
+                        )
+                # Direct verdict flags — policy engine acts on these without
+                # depending on score thresholds. Reliable regardless of whether
+                # the verdict came from L1 (classifier) or L2 (embedding gate).
+                _gs_verdict_str = _gs_result.verdict.value
+                if _gs_verdict_str == "BLOCK":
+                    request.input_data["general_safety_block"] = True
+                elif _gs_verdict_str == "REVIEW":
+                    request.input_data["general_safety_review"] = True
+                # Propagate aggregate risk score
+                if _gs_result.risk_score > 0.0:
+                    request.input_data["general_safety_risk_score"] = round(
+                        _gs_result.risk_score, 4
+                    )
+                # Store verdict for audit logging
+                request.input_data["general_safety_verdict"] = _gs_result.verdict.value
+                request.input_data["general_safety_top_label"] = _gs_result.top_label
+            except Exception as _gs_exc:
+                import traceback as _tb
+                _gsvc_log.error(
+                    "General Safety Moderator inference failed — prompt will not be GS-screened.\n%s",
+                    _tb.format_exc()
+                )
+
+        # ── Ownership Detection — post-ML rule layer ──────────────────────────
+        # Distinguishes "show MY transactions" (SELF → ALLOW_WITH_AUTH) from
+        # "show user 9921 transactions" (OTHER → reinforce BLOCK).
+        # ML models see only the data topic and cannot reliably detect pronoun
+        # ownership — this rule layer makes the final call when signal is clear.
+        _ownership_input = original_text or input_text
+        _own = _detect_ownership(_ownership_input)
+        request.input_data["data_request_ownership"]    = _own.ownership.value
+        request.input_data["ownership_decision"]        = _own.decision
+        request.input_data["ownership_matched_pattern"] = _own.matched_pattern
+        request.context["ownership_context"]            = _own.to_dict()
+
+        if _own.ownership == Ownership.SELF:
+            # User is asking about their own data — clear ML data-topic signals
+            # that would otherwise fire consent/personal-data BLOCK rules.
+            # The policy engine will see data_request_self=True and allow.
+            for _clr in ("pii_harvesting_score", "financial_crime_score",
+                         "dpdp_ai_verdict", "general_safety_block", "general_safety_review"):
+                request.input_data.pop(_clr, None)
+            # Keep dpdp_ai_verdict cleared so DPDP consent gate doesn't fire
+            request.input_data["data_request_self"] = True
+
+        elif _own.ownership == Ownership.OTHER:
+            # Confirmed third-party access — reinforce block regardless of ML score
+            request.input_data["data_request_third_party"] = True
+            request.input_data.setdefault("pii_harvesting_score", 0.92)
+            request.input_data.setdefault("personal_data_used",   True)
+            request.input_data.setdefault("consent_verified",     False)
+
+        # ── PII harvesting intent enrichment ─────────────────────────────────
+        # When a prompt expresses INTENT to obtain third-party personal data, also
+        # trigger the DPDP consent gate — the data principal has not consented to
+        # their data being retrieved or aggregated by this request.
+        if request.input_data.get("pii_harvesting_score", 0.0) >= 0.70:
+            request.input_data["personal_data_used"]    = True
+            request.input_data["third_party_pii_access"] = True
+            request.input_data.setdefault("consent_verified", False)
+            request.context.setdefault("domain", "privacy")
+
+        # ── EU AI Act prohibited practice enrichment ──────────────────────────
+        # Biometric categorisation (religion/caste/race) and real-time facial ID
+        # in public spaces also constitute third-party data access without consent.
+        if request.input_data.get("eu_ai_act_score", 0.0) >= 0.70:
+            request.input_data["personal_data_used"]    = True
+            request.input_data.setdefault("consent_verified", False)
+            request.context["eu_ai_act_prohibited_practice"] = True
 
         flag_dicts = [f.model_dump() for f in fairness_flags]
 
@@ -555,7 +801,7 @@ class GovernanceService:
             prompt_text = raw_prompt[:200]
 
         audit_details = {
-            "risk_score": risk_score, 
+            "risk_score": risk_score,
             "reason": primary_reason,
             "prompt": prompt_text,
             "policy_triggered": policy_name,
@@ -563,8 +809,14 @@ class GovernanceService:
             "platform": platform,
             "session_id": request.session_id,
             "violations": [v.get("policy_name") for v in policy_violations],
-            "fairness_flags": len(fairness_flags), 
-            "scenario": domain if is_simulation else None
+            "fairness_flags": len(fairness_flags),
+            "scenario": domain if is_simulation else None,
+            # DPDP AI Moderator fields — present when model is loaded
+            "dpdp_ai_verdict":         request.input_data.get("dpdp_ai_verdict"),
+            "dpdp_ai_risk_score":      request.input_data.get("dpdp_ai_risk_score"),
+            "dpdp_ai_top_label":       request.input_data.get("dpdp_ai_top_label"),
+            "dpdp_ai_reasons":         request.input_data.get("dpdp_ai_reasons"),
+            "dpdp_ai_layer_decisions": request.input_data.get("dpdp_ai_layer_decisions"),
         }
 
         # Compute integrity chain link for this and subsequent audit entries
@@ -718,12 +970,19 @@ class GovernanceService:
         if request.context.get("pii_violations"):
             _risk_analysis["pii_violations"] = request.context["pii_violations"]
 
+        # Ownership override: SELF + no violations → ALLOW_WITH_AUTH
+        _ownership_ctx = request.context.get("ownership_context")
+        _effective_decision = final_decision
+        if (request.input_data.get("data_request_self")
+                and final_decision == EnforcementDecision.PASS):
+            _effective_decision = EnforcementDecision.ALLOW_WITH_AUTH
+
         return GovernanceResult(
             inference_id=inference_id,
             model_id=model.id,
             risk_score=risk_score,
             risk_level=risk_level,
-            enforcement_decision=final_decision,
+            enforcement_decision=_effective_decision,
             fairness_flags=fairness_flags,
             policy_violations=policy_violations,
             risk_analysis=_risk_analysis,
@@ -736,6 +995,7 @@ class GovernanceService:
             ),
             timestamp=datetime.utcnow(),
             processing_time_ms=processing_ms,
+            ownership_context=_ownership_ctx,
         )
 
     async def _record_system_block(

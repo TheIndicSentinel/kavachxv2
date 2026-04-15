@@ -1,0 +1,1 @@
+{"id2label": {"0": "safe", "1": "personal_data", "2": "financial_data", "3": "health_data", "4": "profiling", "5": "surveillance", "6": "criminal_misuse", "7": "compliance_abuse"}, "label2id": {"safe": 0, "personal_data": 1, "financial_data": 2, "health_data": 3, "profiling": 4, "surveillance": 5, "criminal_misuse": 6, "compliance_abuse": 7}}

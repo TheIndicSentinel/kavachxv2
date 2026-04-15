@@ -22,7 +22,7 @@ const TYPE_MAP = {
   principle: 'badge-principle',
 }
 const SEV_MAP = {
-  critical: 'badge-block',
+  critical: 'badge-critical',
   high: 'badge-alert',
   medium: 'badge-warning',
   low: 'badge-muted',
@@ -463,15 +463,18 @@ function PolicyCard({ policy, canToggle, canDelete, onToggle, onDelete, toggling
     ? (policy.tier === 2 ? 'var(--purple)' : 'var(--cyan)')
     : 'var(--accent)'
 
+  const isCritical = policy.severity === 'critical' && policy.enabled
+
   return (
     <div
+      className={isCritical ? 'item-critical' : ''}
       style={{
         padding: '13px 16px',
         borderRadius: 'var(--radius-sm)',
         border: '1px solid var(--border)',
         background: 'var(--bg-elevated)',
         opacity: policy.enabled ? 1 : 0.58,
-        borderLeft: `3px solid ${policy.enabled ? accentColor : 'var(--border)'}`,
+        borderLeft: `3px solid ${policy.enabled ? (isCritical ? 'var(--red)' : accentColor) : 'var(--border)'}`,
         transition: 'all .15s',
       }}
     >

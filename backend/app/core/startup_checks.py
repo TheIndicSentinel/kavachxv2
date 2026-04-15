@@ -82,6 +82,34 @@ def _check_secret_key() -> list[str]:
     return errors
 
 
+def _check_enforcement_flags() -> list[str]:
+    """
+    In production, NAEL and TEE enforcement must be enabled.
+    Running production with these flags off means governance is advisory-only —
+    a serious compliance gap under DPDP 2023 and the proposed BASCG framework.
+    These are always warnings (never errors) because staging environments may
+    intentionally keep them off during phased rollout.
+    """
+    from app.core.config import settings
+    warnings_out: list[str] = []
+
+    if not getattr(settings, "NAEL_ENFORCEMENT_ENABLED", True):
+        warnings_out.append(
+            "NAEL_ENFORCEMENT_ENABLED=False in a production environment. "
+            "AI models without a valid NAEL license will NOT be blocked. "
+            "Set NAEL_ENFORCEMENT_ENABLED=True or accept regulatory exposure."
+        )
+
+    if not getattr(settings, "TEE_ENFORCEMENT_ENABLED", True):
+        warnings_out.append(
+            "TEE_ENFORCEMENT_ENABLED=False in a production environment. "
+            "Inference on compute nodes without a valid TEE clearance will NOT be blocked. "
+            "Set TEE_ENFORCEMENT_ENABLED=True or accept regulatory exposure."
+        )
+
+    return warnings_out
+
+
 def _check_mock_tsa_secret() -> list[str]:
     """
     In production with SOVEREIGN_LEDGER_MODE=mock, warn if MOCK_TSA_SECRET is
@@ -121,6 +149,8 @@ def run_production_checks() -> None:
     errors.extend(_check_bascg_signing_key())
     errors.extend(_check_secret_key())
     warnings.extend(_check_mock_tsa_secret())
+    if prod:
+        warnings.extend(_check_enforcement_flags())
 
     for msg in warnings:
         logger.warning("BASCG startup warning: %s", msg)

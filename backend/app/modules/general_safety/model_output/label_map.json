@@ -1,0 +1,20 @@
+{
+  "id2label": {
+    "0": "safe",
+    "1": "self_harm",
+    "2": "violence",
+    "3": "hate_speech",
+    "4": "prompt_injection",
+    "5": "financial_crime",
+    "6": "eu_ai_act_violation"
+  },
+  "label2id": {
+    "safe": 0,
+    "self_harm": 1,
+    "violence": 2,
+    "hate_speech": 3,
+    "prompt_injection": 4,
+    "financial_crime": 5,
+    "eu_ai_act_violation": 6
+  }
+}

@@ -357,13 +357,36 @@ input,select,textarea{font-family:inherit}
 .badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:600;letter-spacing:.02em;white-space:nowrap}
 .badge-pass,.badge-active,.badge-healthy{background:var(--green-light);color:var(--green)}
 .badge-alert,.badge-warning,.badge-medium{background:var(--amber-light);color:var(--amber)}
-.badge-block,.badge-critical,.badge-high{background:var(--red-light);color:var(--red)}
+.badge-block,.badge-high{background:var(--red-light);color:var(--red)}
 .badge-review{background:var(--orange-light);color:var(--orange)}
 .badge-low{background:var(--purple-light);color:var(--purple)}
 .badge-info,.badge-pending{background:var(--accent-light);color:var(--accent)}
 .badge-muted{background:var(--bg-elevated);color:var(--text-muted)}
 .badge-baseline{background:linear-gradient(135deg,rgba(79,70,229,0.09),rgba(124,58,237,0.09));color:var(--accent-2);border:1px solid rgba(99,102,241,0.18)}
 .badge-principle{background:var(--cyan-light);color:var(--cyan);border:1px solid rgba(8,145,178,.15)}
+/* Critical — stronger red treatment with pulsing border to signal urgency */
+.badge-critical{
+  background:rgba(220,38,38,0.14);
+  color:var(--red);
+  border:1px solid rgba(220,38,38,0.35);
+  animation:badge-crit 2.8s ease-in-out infinite;
+}
+.dark .badge-critical{
+  background:rgba(248,113,113,0.16);
+  color:var(--red);
+  border-color:rgba(248,113,113,0.40);
+}
+@keyframes badge-crit{
+  0%,100%{border-color:rgba(220,38,38,0.35)}
+  50%{border-color:rgba(220,38,38,0.70);box-shadow:0 0 0 2px rgba(220,38,38,0.09)}
+}
+.dark .badge-critical{--_rc:rgba(248,113,113,0.40);--_rca:rgba(248,113,113,0.08)}
+/* Critical table rows — very subtle red tint */
+tr.row-critical td{background:rgba(220,38,38,0.025)}
+.dark tr.row-critical td{background:rgba(248,113,113,0.04)}
+/* Critical cards — very subtle red tint + red left border accent */
+.item-critical{background:rgba(220,38,38,0.025)!important;border-left-color:var(--red)!important}
+.dark .item-critical{background:rgba(248,113,113,0.04)!important}
 .badge-principle-law{background:var(--cyan-light);color:var(--cyan);border:1px solid rgba(8,145,178,.15);display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:600;letter-spacing:.02em;white-space:nowrap}
 .badge-principle-fwd{background:var(--purple-light);color:var(--purple);border:1px solid rgba(124,58,237,.15);display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:600;letter-spacing:.02em;white-space:nowrap}
 

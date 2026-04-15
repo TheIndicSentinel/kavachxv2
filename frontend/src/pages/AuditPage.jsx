@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { auditAPI } from '../utils/api'
 import { Download, Search, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
+import { getRiskBadge } from '../utils/helpers'
 
 const EVENT_TYPES = ['all', 'inference_evaluated', 'policy_violated', 'model_blocked', 'model_registered', 'policy_created']
 const PAGE_SIZE = 15
@@ -41,6 +42,16 @@ const DECISION_BADGE = {
   HUMAN_REVIEW: 'badge-review', REVIEW: 'badge-review',
   BLOCK: 'badge-block',
 }
+
+const EVENT_BADGE = {
+  policy_violated:         'badge-block',
+  model_blocked:           'badge-block',
+  fairness_issue_detected: 'badge-alert',
+  inference_evaluated:     'badge-info',
+  model_registered:        'badge-pass',
+  policy_created:          'badge-pass',
+}
+const eventBadge = (et) => EVENT_BADGE[et] || 'badge-muted'
 
 export default function AuditPage() {
   const [logs, setLogs] = useState([])
@@ -84,7 +95,7 @@ export default function AuditPage() {
 
   const totalFiltered = filtered.length
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-  const riskBadge = (r) => ({ high: 'badge-block', critical: 'badge-block', medium: 'badge-alert', low: 'badge-pass' }[r] || 'badge-muted')
+  const riskBadge = getRiskBadge
 
     const exportCSV = () => {
     const rows = [['Timestamp', 'Session ID', 'Event Type', 'Decision', 'Risk Score', 'Risk Level', 'Prompt', 'Policy Triggered', 'Reason', 'Model', 'Platform'].join(',')]
@@ -184,11 +195,11 @@ export default function AuditPage() {
                         key={l.id}
                         onClick={() => setSelectedLog(l)}
                         style={{ cursor: 'pointer', transition: 'background-color 0.15s ease' }}
-                        className="hover-row"
+                        className={`hover-row${l.risk_level === 'critical' ? ' row-critical' : ''}`}
                       >
                         <td className="font-mono" style={{ fontSize: 11, whiteSpace: 'nowrap' }}>{new Date(l.timestamp).toLocaleString()}</td>
                         <td className="font-mono" style={{ fontSize: 10, color: 'var(--text-muted)' }}>{sessionId.substring(0,8)}...</td>
-                        <td><span className="badge badge-info">{l.event_type?.replace(/_/g, ' ')}</span></td>
+                        <td><span className={`badge ${eventBadge(l.event_type)}`}>{l.event_type?.replace(/_/g, ' ')}</span></td>
                         <td style={{ fontSize: 11, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={prompt}>
                           {prompt.length > 40 ? prompt.substring(0, 40) + '…' : prompt}
                         </td>
@@ -280,7 +291,7 @@ export default function AuditPage() {
           </div>
           <style dangerouslySetInnerHTML={{ __html: `
             @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-            .hover-row:hover { background-color: var(--accent-light) !important; }
+            .hover-row:hover td { background-color: var(--accent-light) !important; }
             .audit-detail-drawer { max-width: 100vw; }
             @media (max-width: 768px) {
               .audit-detail-drawer {
